@@ -1,0 +1,34 @@
+<% content_for :title, "Open bounties" %>
+
+<div class="flex items-end justify-between">
+  <div>
+    <h1 class="text-2xl font-bold">Open bounties</h1>
+    <p class="mt-1 text-sm text-slate-600">Funded issues across every repo using GitReward. Solve one, link a wallet, get paid on merge.</p>
+  </div>
+  <div class="text-right">
+    <div class="text-2xl font-bold text-emerald-600"><%= number_with_delimiter((@total_open / Bounty::USDC_UNIT.to_d).to_i) %> USDC</div>
+    <div class="text-xs text-slate-500">currently escrowed & open</div>
+  </div>
+</div>
+
+<% if @bounties.any? %>
+  <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <% @bounties.each do |b| %>
+      <div class="bg-white p-4 rounded-lg border border-slate-200 flex flex-col">
+        <div class="text-sm text-slate-500"><%= b.repository.full_name %></div>
+        <div class="mt-1 font-medium">Issue #<%= b.github_issue_number %></div>
+        <div class="mt-3 text-2xl font-bold text-emerald-600"><%= b.amount_usdc %> USDC</div>
+        <div class="mt-1 text-xs text-slate-400">expires <%= b.expiry&.to_date %> · merges into <code><%= b.target_branch %></code></div>
+        <%= link_to "View issue →", b.issue_url, target: "_blank", rel: "noopener",
+              class: "mt-3 text-sm text-emerald-600 hover:underline" %>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <div class="mt-10 text-center text-slate-500">
+    <p>No open bounties yet.</p>
+    <% if signed_in? %>
+      <%= link_to "Fund the first one →", dashboard_path, class: "text-emerald-600 hover:underline" %>
+    <% end %>
+  </div>
+<% end %>

@@ -1,0 +1,62 @@
+<% content_for :title, "Dashboard" %>
+
+<h1 class="text-2xl font-bold">Dashboard</h1>
+
+<div class="mt-6 grid lg:grid-cols-2 gap-6">
+  <%# Wallet linking — the linchpin of getting paid (A.1 #4) %>
+  <section class="bg-white p-5 rounded-lg border border-slate-200">
+    <h2 class="font-semibold">Payout wallet</h2>
+    <% if @wallet %>
+      <p class="mt-2 text-sm text-slate-600">Bounties you earn are paid to:</p>
+      <code class="block mt-1 text-sm bg-slate-100 px-2 py-1 rounded break-all"><%= @wallet.address %></code>
+      <%= link_to "Change wallet", wallet_path, class: "mt-3 inline-block text-sm text-emerald-600 hover:underline" %>
+    <% else %>
+      <p class="mt-2 text-sm text-amber-700">No wallet linked. You can't be paid until you link one.</p>
+      <%= link_to "Link a wallet", wallet_path, class: "mt-3 inline-block bg-slate-900 text-white px-4 py-2 rounded-md text-sm hover:bg-slate-700" %>
+    <% end %>
+  </section>
+
+  <%# GitHub App install — required to fund (read issues, comment, webhooks) %>
+  <section class="bg-white p-5 rounded-lg border border-slate-200">
+    <h2 class="font-semibold">Repositories</h2>
+    <% if @installations.any? %>
+      <ul class="mt-2 space-y-2 text-sm">
+        <% @installations.each do |inst| %>
+          <% inst.repositories.each do |repo| %>
+            <li class="flex items-center justify-between">
+              <span><%= repo.full_name %></span>
+              <%= link_to "Fund an issue", new_bounty_path(repository_id: repo.id), class: "text-emerald-600 hover:underline" %>
+            </li>
+          <% end %>
+        <% end %>
+      </ul>
+      <%= link_to "Manage / add repos", install_path, class: "mt-3 inline-block text-sm text-slate-500 hover:underline" %>
+    <% else %>
+      <p class="mt-2 text-sm text-slate-600">Install the GitReward GitHub App on a repo you own to fund its issues.</p>
+      <%= link_to "Install GitHub App", install_path, class: "mt-3 inline-block bg-slate-900 text-white px-4 py-2 rounded-md text-sm hover:bg-slate-700" %>
+    <% end %>
+  </section>
+</div>
+
+<section class="mt-6 bg-white p-5 rounded-lg border border-slate-200">
+  <h2 class="font-semibold">Your bounties</h2>
+  <% if @bounties.any? %>
+    <table class="mt-3 w-full text-sm">
+      <thead class="text-left text-slate-500 border-b border-slate-200">
+        <tr><th class="py-1">Issue</th><th>Amount</th><th>Status</th><th>Expiry</th></tr>
+      </thead>
+      <tbody>
+        <% @bounties.each do |b| %>
+          <tr class="border-b border-slate-100">
+            <td class="py-2"><%= link_to "#{b.repository.full_name}##{b.github_issue_number}", b, class: "text-emerald-600 hover:underline" %></td>
+            <td><%= b.amount_usdc ? "#{b.amount_usdc} USDC" : "—" %></td>
+            <td><%= render "bounties/status_badge", bounty: b %></td>
+            <td><%= b.expiry&.to_date %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p class="mt-2 text-sm text-slate-600">No bounties yet. Install the App and fund an issue to get started.</p>
+  <% end %>
+</section>

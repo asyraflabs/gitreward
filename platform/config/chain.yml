@@ -1,0 +1,34 @@
+# Non-secret per-network chain parameters. Keys live in encrypted credentials
+# (credentials.chain.oracle_key / relayer_key), never here. Addresses are set
+# after deploying the escrow to each network; override via env in deployed envs.
+#
+# USDC: Base Sepolia is Circle's testnet USDC (B.1). Base mainnet must be
+# verified against Circle's docs before launch — native USDC, never USDbC.
+
+development:
+  network: anvil
+  chain_id: 31337
+  rpc_url: <%= ENV.fetch("CHAIN_RPC_URL", "http://127.0.0.1:8545") %>
+  # Addresses MUST be quoted — unquoted 0x… is parsed by YAML as a hex integer.
+  usdc_address: "<%= ENV.fetch("USDC_ADDRESS", "0x0000000000000000000000000000000000000000") %>"
+  escrow_address: "<%= ENV.fetch("ESCROW_ADDRESS", "0x0000000000000000000000000000000000000000") %>"
+  usdc_permit_version: "1"   # MockUSDC uses OZ ERC20Permit default version "1"
+  confirmations: 0
+
+test:
+  network: anvil
+  chain_id: 31337
+  rpc_url: http://127.0.0.1:8545
+  usdc_address: "0x0000000000000000000000000000000000000000"
+  escrow_address: "0x0000000000000000000000000000000000000000"
+  usdc_permit_version: "1"
+  confirmations: 0
+
+production:
+  network: <%= ENV.fetch("CHAIN_NETWORK", "base_sepolia") %>
+  chain_id: <%= ENV.fetch("CHAIN_ID", 84532) %>
+  rpc_url: <%= ENV.fetch("CHAIN_RPC_URL", "https://sepolia.base.org") %>
+  usdc_address: "<%= ENV.fetch("USDC_ADDRESS", "0x036CbD53842c5426634e7929541eC2318f3dCF7e") %>"
+  escrow_address: "<%= ENV.fetch("ESCROW_ADDRESS", "") %>"
+  usdc_permit_version: <%= ENV.fetch("USDC_PERMIT_VERSION", "2") %>  # Circle USDC permit domain version
+  confirmations: <%= ENV.fetch("CHAIN_CONFIRMATIONS", 2) %>

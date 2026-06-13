@@ -1,0 +1,78 @@
+<% content_for :title, "Fund a bounty" %>
+
+<section class="max-w-xl"
+  data-controller="wallet"
+  data-wallet-chain-id-value="<%= Chain::Config.chain_id %>"
+  data-wallet-escrow-value="<%= Chain::Config.escrow_address %>"
+  data-wallet-usdc-value="<%= Chain::Config.usdc_address %>"
+  data-wallet-usdc-version-value="<%= Chain::Config.usdc_permit_version %>"
+  data-wallet-fee-bps-value="<%= @fee_bps %>"
+  data-wallet-create-url-value="<%= bounties_path %>"
+  data-wallet-repository-id-value="<%= @repository.id %>"
+  data-wallet-csrf-value="<%= form_authenticity_token %>">
+
+  <h1 class="text-2xl font-bold">Fund a bounty</h1>
+  <p class="mt-1 text-sm text-slate-600"><%= @repository.full_name %></p>
+
+  <% unless Chain::Config.escrow_configured? %>
+    <div class="mt-4 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-2 rounded-md text-sm">
+      The escrow contract address isn't configured for this network yet, so funding is disabled.
+    </div>
+  <% end %>
+
+  <div class="mt-5 space-y-4">
+    <div>
+      <label class="block text-sm font-medium">Issue</label>
+      <% if @issues.any? %>
+        <select data-wallet-target="issue"
+          class="mt-1 w-full border border-slate-300 rounded-md px-3 py-2 text-sm">
+          <% @issues.each do |i| %>
+            <option value="<%= i[:number] %>"
+              data-node-id="<%= i[:node_id] %>"
+              data-issue-ref="<%= i[:issue_ref] %>"
+              <%= "disabled" if i[:has_active_bounty] %>>
+              #<%= i[:number] %> — <%= truncate(i[:title], length: 60) %><%= " (already funded)" if i[:has_active_bounty] %>
+            </option>
+          <% end %>
+        </select>
+      <% else %>
+        <p class="mt-1 text-sm text-slate-500">No open issues found (or the GitHub App can't read them yet).</p>
+      <% end %>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">Target branch</label>
+      <input type="text" data-wallet-target="branch" value="<%= @repository.default_branch %>"
+        class="mt-1 w-full border border-slate-300 rounded-md px-3 py-2 text-sm font-mono">
+      <p class="mt-1 text-xs text-slate-500">The PR must merge into this branch to disburse (A.1 #3).</p>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">Amount (USDC)</label>
+      <input type="number" data-wallet-target="amount" min="<%= @min_usdc %>" step="0.01" value="50"
+        class="mt-1 w-full border border-slate-300 rounded-md px-3 py-2 text-sm">
+      <p class="mt-1 text-xs text-slate-500">Minimum <%= @min_usdc %> USDC. Fee: <span data-wallet-target="feeLabel"><%= @fee_bps / 100.0 %></span>% (read live from the contract).</p>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">Expires in (days)</label>
+      <input type="number" data-wallet-target="expiry" min="7" value="<%= @default_expiry_days %>"
+        class="mt-1 w-full border border-slate-300 rounded-md px-3 py-2 text-sm">
+      <p class="mt-1 text-xs text-slate-500">Minimum 7 days. After expiry, unspent bounties refund to you.</p>
+    </div>
+
+    <button data-wallet-target="submit" data-action="wallet#fund"
+      <%= "disabled" unless Chain::Config.escrow_configured? %>
+      class="w-full bg-emerald-600 text-white px-4 py-2.5 rounded-md font-medium hover:bg-emerald-700 disabled:opacity-40 cursor-pointer">
+      Connect wallet &amp; fund
+    </button>
+
+    <p data-wallet-target="status" class="text-sm text-slate-600"></p>
+  </div>
+
+  <p class="mt-6 text-xs text-slate-400">
+    You'll sign two things: a gasless USDC <em>permit</em> (authorizing the escrow to pull the funds)
+    and the <em>fund</em> transaction itself (you pay only its gas). The USDC then sits in the
+    open-source escrow until the issue's PR merges, or until you refund after expiry.
+  </p>
+</section>

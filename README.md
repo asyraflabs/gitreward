@@ -14,7 +14,9 @@ fund. Not "trustless."
 | Path                       | What                                              | License   |
 |----------------------------|---------------------------------------------------|-----------|
 | [`contracts/`](./contracts)| Solidity escrow (Foundry). The trust anchor.      | MIT       |
-| `app/` *(Phase 3)*         | Rails platform: web + oracle + relayer.           | AGPL-3.0  |
+| [`platform/`](./platform)  | Rails platform: web + oracle + relayer.           | AGPL-3.0  |
+| [`oracle/`](./oracle)      | Canonical EIP-712 signer, shared by app + contract test. | AGPL-3.0 |
+| [`docs/`](./docs)          | Merge-correctness webhook spec.                   | —         |
 | [`gitreward-build-plan.md`](./gitreward-build-plan.md) | Full build plan. **Appendix A is the frozen spec.** | — |
 
 See [`LICENSING.md`](./LICENSING.md) for the open-core split.
@@ -25,7 +27,7 @@ See [`LICENSING.md`](./LICENSING.md) for the open-core split.
 |-------|------|-------|
 | 1 | Protocol design (frozen spec — Appendix A) | ✅ Frozen |
 | 2 | Smart contract + tests on Base Sepolia | 🚧 In progress |
-| 3 | Rails platform (web + oracle + relayer) | ⬜ Not started |
+| 3 | Rails platform (web + oracle + relayer) | ✅ Built; validated end-to-end on local anvil |
 | 4 | Audit / testnet beta / mainnet | ⬜ Not started |
 
 ## Contracts — quick start

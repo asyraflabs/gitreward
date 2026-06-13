@@ -11,12 +11,12 @@ contracts/.env
 *.key
 *.pem
 
-# Rails (added in Phase 3)
-/app-rails/log/*
-/app-rails/tmp/*
-/app-rails/storage/*
-/app-rails/config/master.key
-/app-rails/config/credentials/*.key
+# Rails platform
+/platform/log/*
+/platform/tmp/*
+/platform/storage/*
+/platform/config/master.key
+/platform/config/credentials/*.key
 node_modules/
 
 # OS / editor

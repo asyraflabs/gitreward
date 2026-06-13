@@ -1,0 +1,151 @@
+import { Controller } from "@hotwired/stimulus"
+import {
+  createWalletClient, createPublicClient, custom, defineChain, parseUnits
+} from "viem"
+
+// The only browser chain code in the app (build plan §2): connect wallet, sign a
+// gasless USDC EIP-2612 permit, then send the escrow `fund` tx. Everything else
+// is server-rendered Hotwire. Two DISTINCT EIP-712 domains are in play here — the
+// USDC permit domain (name from the token, version per network) and, separately,
+// GitReward's disbursement domain (signed server-side, never here). Don't conflate.
+export default class extends Controller {
+  static targets = ["issue", "branch", "amount", "expiry", "submit", "status", "feeLabel"]
+  static values = {
+    chainId: Number, escrow: String, usdc: String, usdcVersion: String,
+    feeBps: Number, createUrl: String, repositoryId: Number, csrf: String
+  }
+
+  // Minimal ABIs (the only functions we touch in-browser).
+  fundAbi = [{
+    type: "function", name: "fund", stateMutability: "nonpayable",
+    inputs: [
+      { name: "amount", type: "uint256" }, { name: "expiry", type: "uint64" },
+      { name: "issueRef", type: "bytes32" }, { name: "permitValue", type: "uint256" },
+      { name: "permitDeadline", type: "uint256" }, { name: "permitV", type: "uint8" },
+      { name: "permitR", type: "bytes32" }, { name: "permitS", type: "bytes32" }
+    ],
+    outputs: [{ name: "bountyId", type: "uint256" }]
+  }]
+  usdcAbi = [
+    { type: "function", name: "name", stateMutability: "view", inputs: [], outputs: [{ type: "string" }] },
+    { type: "function", name: "nonces", stateMutability: "view", inputs: [{ name: "owner", type: "address" }], outputs: [{ type: "uint256" }] }
+  ]
+
+  chain() {
+    return defineChain({
+      id: this.chainIdValue,
+      name: `chain-${this.chainIdValue}`,
+      nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+      rpcUrls: { default: { http: [] } }
+    })
+  }
+
+  async fund(event) {
+    event.preventDefault()
+    if (!window.ethereum) return this.fail("No Ethereum wallet found. Install MetaMask or a Base wallet.")
+
+    const issueEl = this.issueTarget.selectedOptions[0]
+    if (!issueEl) return this.fail("Select an issue to fund.")
+    const issueNumber = issueEl.value
+    const issueNodeId = issueEl.dataset.nodeId
+    const issueRef = issueEl.dataset.issueRef
+
+    const usdcAmount = this.amountTarget.value
+    const days = parseInt(this.expiryTarget.value, 10)
+    if (!usdcAmount || Number(usdcAmount) < 5) return this.fail("Minimum bounty is 5 USDC.")
+    if (!days || days < 7) return this.fail("Expiry must be at least 7 days.")
+
+    const amount = parseUnits(usdcAmount, 6)               // USDC base units (6 decimals)
+    const expiry = BigInt(Math.floor(Date.now() / 1000) + days * 86400)
+    const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600)
+
+    try {
+      this.busy("Connecting wallet…")
+      const chain = this.chain()
+      const wallet = createWalletClient({ chain, transport: custom(window.ethereum) })
+      const pub = createPublicClient({ chain, transport: custom(window.ethereum) })
+      const [account] = await wallet.requestAddresses()
+
+      this.busy("Reading USDC permit details…")
+      const [tokenName, nonce] = await Promise.all([
+        pub.readContract({ address: this.usdcValue, abi: this.usdcAbi, functionName: "name" }),
+        pub.readContract({ address: this.usdcValue, abi: this.usdcAbi, functionName: "nonces", args: [account] })
+      ])
+
+      this.busy("Sign the USDC permit (gasless)…")
+      const permitSig = await wallet.signTypedData({
+        account,
+        domain: { name: tokenName, version: this.usdcVersionValue, chainId: this.chainIdValue, verifyingContract: this.usdcValue },
+        types: {
+          Permit: [
+            { name: "owner", type: "address" }, { name: "spender", type: "address" },
+            { name: "value", type: "uint256" }, { name: "nonce", type: "uint256" },
+            { name: "deadline", type: "uint256" }
+          ]
+        },
+        primaryType: "Permit",
+        message: { owner: account, spender: this.escrowValue, value: amount, nonce, deadline }
+      })
+      const { v, r, s } = this.splitSig(permitSig)
+
+      this.busy("Confirm the fund transaction in your wallet…")
+      const txHash = await wallet.writeContract({
+        account, chain,
+        address: this.escrowValue, abi: this.fundAbi, functionName: "fund",
+        args: [amount, expiry, issueRef, amount, deadline, v, r, s]
+      })
+
+      this.busy("Recording your bounty…")
+      await this.record({ issueNumber, issueNodeId, issueRef, amount, expiry, txHash })
+    } catch (e) {
+      console.error(e)
+      this.fail(e.shortMessage || e.message || "Funding failed.")
+    }
+  }
+
+  async record({ issueNumber, issueNodeId, issueRef, amount, expiry, txHash }) {
+    const res = await fetch(this.createUrlValue, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-CSRF-Token": this.csrfValue, "Accept": "application/json" },
+      body: JSON.stringify({
+        repository_id: this.repositoryIdValue,
+        bounty: {
+          amount: amount.toString(),
+          fee_bps_snapshot: this.feeBpsValue,
+          expiry: expiry.toString(),
+          github_issue_number: issueNumber,
+          github_issue_node_id: issueNodeId,
+          target_branch: this.branchTarget.value,
+          issue_ref: issueRef,
+          fund_tx_hash: txHash
+        }
+      })
+    })
+    const data = await res.json()
+    if (data.ok) {
+      this.busy("Funded! Redirecting…")
+      window.location = data.redirect
+    } else {
+      this.fail((data.errors || ["Could not record bounty"]).join(", "))
+    }
+  }
+
+  splitSig(sig) {
+    const r = `0x${sig.slice(2, 66)}`
+    const s = `0x${sig.slice(66, 130)}`
+    const v = parseInt(sig.slice(130, 132), 16)
+    return { v, r, s }
+  }
+
+  busy(msg) {
+    this.submitTarget.disabled = true
+    this.statusTarget.textContent = msg
+    this.statusTarget.className = "text-sm text-slate-600"
+  }
+
+  fail(msg) {
+    this.submitTarget.disabled = false
+    this.statusTarget.textContent = msg
+    this.statusTarget.className = "text-sm text-red-600"
+  }
+}

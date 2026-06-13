@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "GitReward" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="GitReward">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="bg-slate-50 text-slate-900 min-h-screen">
+    <header class="border-b border-slate-200 bg-white">
+      <nav class="container mx-auto px-5 py-3 flex items-center justify-between">
+        <%= link_to root_path, class: "flex items-center gap-2 font-semibold text-lg" do %>
+          <span class="text-emerald-600">◈</span> GitReward
+        <% end %>
+        <div class="flex items-center gap-4 text-sm">
+          <%= link_to "Bounties", directory_path, class: "hover:text-emerald-600" %>
+          <%= link_to "Trust", trust_path, class: "hover:text-emerald-600" %>
+          <% if signed_in? %>
+            <%= link_to "Dashboard", dashboard_path, class: "hover:text-emerald-600" %>
+            <span class="flex items-center gap-2">
+              <%= image_tag current_user.github_avatar_url, class: "w-6 h-6 rounded-full", alt: "" if current_user.github_avatar_url %>
+              <%= current_user.github_login %>
+            </span>
+            <%= button_to "Sign out", logout_path, method: :delete, class: "text-slate-500 hover:text-slate-800" %>
+          <% else %>
+            <%= button_to "Sign in with GitHub", github_auth_path, method: :post, data: { turbo: false },
+                  class: "bg-slate-900 text-white px-3 py-1.5 rounded-md hover:bg-slate-700" %>
+          <% end %>
+        </div>
+      </nav>
+    </header>
+
+    <% if notice %>
+      <div class="container mx-auto px-5 mt-4"><div class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-2 rounded-md text-sm"><%= notice %></div></div>
+    <% end %>
+    <% if alert %>
+      <div class="container mx-auto px-5 mt-4"><div class="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-2 rounded-md text-sm"><%= alert %></div></div>
+    <% end %>
+
+    <main class="container mx-auto px-5 py-8">
+      <%= yield %>
+    </main>
+  </body>
+</html>

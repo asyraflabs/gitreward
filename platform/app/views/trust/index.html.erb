@@ -1,0 +1,50 @@
+<% content_for :title, "How GitReward handles your money" %>
+
+<section class="max-w-3xl">
+  <h1 class="text-2xl font-bold">How GitReward handles your money</h1>
+  <p class="mt-2 text-slate-600">Plain English, no hand-waving. One honest claim: non-custodial, one neutral oracle, you only pay gas to fund.</p>
+
+  <div class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+    <div class="bg-white p-4 rounded-lg border border-slate-200">
+      <div class="text-2xl font-bold text-blue-600"><%= @settled_count %></div>
+      <div class="text-xs text-slate-500">bounties paid</div>
+    </div>
+    <div class="bg-white p-4 rounded-lg border border-slate-200">
+      <div class="text-2xl font-bold text-emerald-600"><%= number_with_delimiter((@total_paid / Bounty::USDC_UNIT.to_d).to_i) %></div>
+      <div class="text-xs text-slate-500">USDC paid out</div>
+    </div>
+    <div class="bg-white p-4 rounded-lg border border-slate-200">
+      <div class="text-2xl font-bold"><%= @open_count %></div>
+      <div class="text-xs text-slate-500">open & escrowed</div>
+    </div>
+    <div class="bg-white p-4 rounded-lg border border-slate-200">
+      <div class="text-2xl font-bold"><%= @refunded_count %></div>
+      <div class="text-xs text-slate-500">refunded cleanly</div>
+    </div>
+  </div>
+
+  <div class="mt-8 space-y-4 text-sm text-slate-700">
+    <div>
+      <h2 class="font-semibold text-base">What we are</h2>
+      <p>Non-custodial. Your USDC sits in an open-source escrow contract on Base — not in our bank account. We can't spend it, and we can't stop a refund.</p>
+    </div>
+    <div>
+      <h2 class="font-semibold text-base">The one thing you trust us with</h2>
+      <p>When a bounty PR merges, we (one neutral oracle) sign a message that says "pay this contributor." The contract checks our signature and pays out. That signature is the only power we hold — and it can only pay the address the contributor themselves linked. It cannot redirect funds elsewhere.</p>
+    </div>
+    <div>
+      <h2 class="font-semibold text-base">If we disappear</h2>
+      <p>Every unmatched bounty refunds to the funder after expiry, with no action from us and no fee. The self-refund timer is the backstop that makes the whole thing safe.</p>
+    </div>
+    <div>
+      <h2 class="font-semibold text-base">The fee</h2>
+      <p>Currently <strong><%= @fee_bps / 100.0 %>%</strong>, read live from the contract. The contract hard-caps the fee at <strong>10%</strong> — we literally cannot charge more, by design. Compare that to the 20%+ that's normal elsewhere.</p>
+    </div>
+    <% if @escrow_address %>
+      <div>
+        <h2 class="font-semibold text-base">Verify it yourself</h2>
+        <p>Escrow contract (<%= @network %>): <code class="break-all"><%= @escrow_address %></code></p>
+      </div>
+    <% end %>
+  </div>
+</section>

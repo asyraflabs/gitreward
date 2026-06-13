@@ -1,0 +1,45 @@
+<% content_for :title, "Bounty ##{@bounty.id}" %>
+
+<section class="max-w-2xl">
+  <div class="flex items-center gap-3">
+    <h1 class="text-2xl font-bold"><%= @bounty.repository.full_name %> #<%= @bounty.github_issue_number %></h1>
+    <%= render "bounties/status_badge", bounty: @bounty %>
+  </div>
+  <%= link_to "View issue on GitHub →", @bounty.issue_url, class: "mt-1 inline-block text-sm text-emerald-600 hover:underline", target: "_blank", rel: "noopener" %>
+
+  <dl class="mt-6 grid grid-cols-2 gap-y-3 text-sm bg-white p-5 rounded-lg border border-slate-200">
+    <dt class="text-slate-500">Amount</dt>
+    <dd class="font-medium"><%= @bounty.amount_usdc ? "#{@bounty.amount_usdc} USDC" : "—" %></dd>
+
+    <dt class="text-slate-500">Fee (snapshot)</dt>
+    <dd><%= @bounty.fee_bps_snapshot ? "#{@bounty.fee_bps_snapshot / 100.0}%" : "—" %></dd>
+
+    <dt class="text-slate-500">Target branch</dt>
+    <dd class="font-mono"><%= @bounty.target_branch %></dd>
+
+    <dt class="text-slate-500">Expiry</dt>
+    <dd><%= @bounty.expiry ? "#{@bounty.expiry.to_date} (#{time_ago_in_words(@bounty.expiry)} #{@bounty.expiry.past? ? 'ago' : 'from now'})" : "—" %></dd>
+
+    <% if @bounty.chain_bounty_id %>
+      <dt class="text-slate-500">On-chain bounty id</dt>
+      <dd class="font-mono"><%= @bounty.chain_bounty_id %></dd>
+    <% end %>
+
+    <% if @bounty.recipient_address %>
+      <dt class="text-slate-500">Paid to</dt>
+      <dd class="font-mono break-all"><%= @bounty.recipient_address %></dd>
+    <% end %>
+  </dl>
+
+  <% if @bounty.pending? %>
+    <p class="mt-4 text-sm text-slate-500">⏳ Waiting for the fund transaction to confirm on-chain. This becomes <strong>funded</strong> once the indexer sees the <code>Funded</code> event.</p>
+  <% elsif @bounty.funded? %>
+    <p class="mt-4 text-sm text-slate-600">Open a PR that closes <code>#<%= @bounty.github_issue_number %></code> and merge it into <code><%= @bounty.target_branch %></code> to disburse, or refund yourself after expiry.</p>
+  <% elsif @bounty.disbursed? && @bounty.attestation %>
+    <p class="mt-4 text-sm text-slate-600">Disbursed for <code><%= @bounty.attestation.pr_ref %></code>.</p>
+  <% end %>
+
+  <% if @bounty.fund_tx_hash %>
+    <p class="mt-4 text-xs text-slate-400">Fund tx: <span class="font-mono break-all"><%= @bounty.fund_tx_hash %></span></p>
+  <% end %>
+</section>

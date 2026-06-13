@@ -1,0 +1,23 @@
+<% content_for :title, "Your bounties" %>
+
+<h1 class="text-2xl font-bold">Your bounties</h1>
+
+<% if @bounties.any? %>
+  <table class="mt-4 w-full text-sm bg-white rounded-lg border border-slate-200 overflow-hidden">
+    <thead class="text-left text-slate-500 border-b border-slate-200 bg-slate-50">
+      <tr><th class="py-2 px-3">Issue</th><th>Amount</th><th>Status</th><th>Expiry</th></tr>
+    </thead>
+    <tbody>
+      <% @bounties.each do |b| %>
+        <tr class="border-b border-slate-100">
+          <td class="py-2 px-3"><%= link_to "#{b.repository.full_name}##{b.github_issue_number}", b, class: "text-emerald-600 hover:underline" %></td>
+          <td><%= b.amount_usdc ? "#{b.amount_usdc} USDC" : "—" %></td>
+          <td><%= render "bounties/status_badge", bounty: b %></td>
+          <td><%= b.expiry&.to_date %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p class="mt-4 text-sm text-slate-600">No bounties yet. <%= link_to "Fund one from your dashboard", dashboard_path, class: "text-emerald-600 hover:underline" %>.</p>
+<% end %>
