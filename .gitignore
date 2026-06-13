@@ -1,0 +1,24 @@
+# Foundry
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+contracts/.env
+
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Rails (added in Phase 3)
+/app-rails/log/*
+/app-rails/tmp/*
+/app-rails/storage/*
+/app-rails/config/master.key
+/app-rails/config/credentials/*.key
+node_modules/
+
+# OS / editor
+.DS_Store
+*.swp

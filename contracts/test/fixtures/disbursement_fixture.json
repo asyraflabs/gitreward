@@ -1,0 +1,16 @@
+{
+  "description": "EIP-712 Disbursement attestation signed by eth.rb. Solidity must recover `expectedSigner` from `signature` over this digest.",
+  "domain": {
+    "name": "GitReward",
+    "version": "1",
+    "chainId": 84532,
+    "verifyingContract": "0x000000000000000000000000000000000000C0DE"
+  },
+  "message": {
+    "bountyId": 1,
+    "recipient": "0x000000000000000000000000000000000000bEEF"
+  },
+  "expectedSigner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+  "digest": "0x3e90501a75d29ed08a52bad836b4739301c0f31d6e786c8aba732dd86629a11a",
+  "signature": "0xf9b2317fc1327586f2f7cc1a55febce758d62dde8e34e76200f6e7c08d4b75842d200e3ae6709a1ffdc817918238f057c50971afd01d9d386c69591edc1880e71c"
+}
