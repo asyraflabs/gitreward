@@ -13,6 +13,16 @@ class WalletLinkTest < ActiveSupport::TestCase
     assert_not w.valid?
   end
 
+  test "linking a replacement wallet swaps active without a unique-index collision" do
+    # Mirrors WalletsController#create when the user already has an active wallet.
+    first = @user.wallet_links.create!(address: "0x14dC79964da2C08b23698B3D3cc7Ca32193d9955")
+    second = @user.wallet_links.build(address: "0x90F79bf6EB2c4f870365E785982E1f101E93b906", active: false)
+    assert second.save
+    assert_nothing_raised { second.activate! }
+    assert_equal second, @user.reload.active_wallet
+    assert_not first.reload.active
+  end
+
   test "activate! enforces a single active wallet" do
     a = @user.wallet_links.create!(address: "0x14dC79964da2C08b23698B3D3cc7Ca32193d9955")
     b = @user.wallet_links.create!(address: "0x90F79bf6EB2c4f870365E785982E1f101E93b906", active: false)

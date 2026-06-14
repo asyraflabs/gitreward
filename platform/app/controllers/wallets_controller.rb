@@ -9,7 +9,10 @@ class WalletsController < ApplicationController
   # enters here IS their explicit confirmation of where to be paid (A.1 #4) —
   # a bad address is their assertion, not platform liability (§3.4).
   def create
-    wallet = current_user.wallet_links.build(address: wallet_params[:address])
+    # Create inactive, then activate! (which deactivates the prior active wallet
+    # in one transaction). Building it active would collide with the existing
+    # active wallet under the one-active-per-user unique index.
+    wallet = current_user.wallet_links.build(address: wallet_params[:address], active: false)
     if wallet.save
       wallet.activate!
       redirect_to dashboard_path, notice: "Payout wallet linked: #{wallet.address}"
