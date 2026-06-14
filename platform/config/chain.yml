@@ -5,18 +5,20 @@
 # USDC: Base Sepolia is Circle's testnet USDC (B.1). Base mainnet must be
 # verified against Circle's docs before launch — native USDC, never USDbC.
 
+# Defaults to local anvil; point at Base Sepolia by setting CHAIN_NETWORK=base_sepolia
+# (plus CHAIN_ID/CHAIN_RPC_URL/USDC_ADDRESS/ESCROW_ADDRESS/… ) without changing code.
 development:
-  network: anvil
-  chain_id: 31337
+  network: <%= ENV.fetch("CHAIN_NETWORK", "anvil") %>
+  chain_id: <%= ENV.fetch("CHAIN_ID", 31337) %>
   rpc_url: <%= ENV.fetch("CHAIN_RPC_URL", "http://127.0.0.1:8545") %>
   # Addresses MUST be quoted — unquoted 0x… is parsed by YAML as a hex integer.
   usdc_address: "<%= ENV.fetch("USDC_ADDRESS", "0x0000000000000000000000000000000000000000") %>"
   escrow_address: "<%= ENV.fetch("ESCROW_ADDRESS", "0x0000000000000000000000000000000000000000") %>"
-  usdc_permit_version: "1"   # MockUSDC uses OZ ERC20Permit default version "1"
+  usdc_permit_version: "<%= ENV.fetch("USDC_PERMIT_VERSION", "1") %>"   # anvil MockUSDC = "1"; Base USDC = "2"
   # Browser-safe RPC + label for the funding controller's network switch/add.
   public_rpc_url: "<%= ENV.fetch("PUBLIC_RPC_URL", "http://127.0.0.1:8545") %>"
-  chain_label: "Anvil (local)"
-  confirmations: 0
+  chain_label: "<%= ENV.fetch("CHAIN_LABEL", "Anvil (local)") %>"
+  confirmations: <%= ENV.fetch("CHAIN_CONFIRMATIONS", 0) %>
 
 test:
   network: anvil

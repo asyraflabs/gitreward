@@ -28,20 +28,19 @@ module Chain
     def chain_label     = settings.fetch(:chain_label, "chain #{chain_id}")
 
     # The crown jewel: authorizes payouts. Never logged, never plaintext env (A.5).
-    def oracle_key
-      key = Rails.application.credentials.dig(:chain, :oracle_key)
-      raise "chain.oracle_key missing from credentials" if key.blank?
-
-      Eth::Key.new(priv: key)
-    end
+    def oracle_key  = Eth::Key.new(priv: network_secret(:oracle_key))
 
     # Pays gas only; a leak cannot redirect funds (the contract trusts the
     # signature, not msg.sender). Kept distinct from the oracle key (A.5/§7).
-    def relayer_key
-      key = Rails.application.credentials.dig(:chain, :relayer_key)
-      raise "chain.relayer_key missing from credentials" if key.blank?
+    def relayer_key = Eth::Key.new(priv: network_secret(:relayer_key))
 
-      Eth::Key.new(priv: key)
+    # Keys are namespaced per network in credentials (chain.<network>.<role>) so
+    # anvil/base_sepolia/mainnet keys coexist and never get cross-used.
+    def network_secret(role)
+      key = Rails.application.credentials.dig(:chain, network.to_sym, role)
+      raise "chain.#{network}.#{role} missing from credentials" if key.blank?
+
+      key
     end
 
     def oracle_signer_address = oracle_key.address.to_s
