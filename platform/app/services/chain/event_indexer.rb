@@ -61,6 +61,7 @@ module Chain
                Bounty.find_by(chain_bounty_id: bounty_id)
       return unless bounty # funded outside our platform; v1 ignores (logged upstream)
 
+      was_funded = bounty.funded?
       bounty.update!(
         chain_bounty_id: bounty_id,
         amount: amount,
@@ -69,6 +70,10 @@ module Chain
         funder_address: funder,
         status: :funded
       )
+
+      # Announce on the issue only on the pending -> funded transition (build
+      # plan §1.2 step 3), so a redelivered/re-synced log never double-comments.
+      Bounties::Announcer.announce_funded(bounty) unless was_funded
     end
 
     def on_disbursed(log)
