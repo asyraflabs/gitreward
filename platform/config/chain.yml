@@ -19,6 +19,7 @@ development:
   public_rpc_url: "<%= ENV.fetch("PUBLIC_RPC_URL", "http://127.0.0.1:8545") %>"
   chain_label: "<%= ENV.fetch("CHAIN_LABEL", "Anvil (local)") %>"
   confirmations: <%= ENV.fetch("CHAIN_CONFIRMATIONS", 0) %>
+  start_block: <%= ENV.fetch("CHAIN_START_BLOCK", 0) %>   # escrow deploy block; 0 = anvil genesis
 
 test:
   network: anvil
@@ -42,3 +43,4 @@ production:
   public_rpc_url: "<%= ENV.fetch("PUBLIC_RPC_URL", "https://sepolia.base.org") %>"
   chain_label: "<%= ENV.fetch("CHAIN_LABEL", "Base Sepolia") %>"
   confirmations: <%= ENV.fetch("CHAIN_CONFIRMATIONS", 2) %>
+  start_block: <%= ENV.fetch("CHAIN_START_BLOCK", 0) %>   # set to the escrow's deploy block

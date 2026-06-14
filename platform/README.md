@@ -100,8 +100,9 @@ set -a && . ./.env.base_sepolia && set +a && bin/jobs
 ```
 
 > Indexer note: the recurring job resumes from `chain_sync_state.last_synced_block`.
-> On a fresh cursor it would scan from block 0 — infeasible on a live chain — so
-> production needs a configurable deploy/start block (TODO).
+> On a fresh cursor it begins at `CHAIN_START_BLOCK` (the escrow's deploy block),
+> not genesis — set it per network (anvil defaults to 0). The DB money state is
+> fully rebuildable by wiping the cursor and replaying from there (C.1).
 
 ## Tests
 

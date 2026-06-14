@@ -25,7 +25,9 @@ module Chain
     # Process new blocks once. Returns the block synced to.
     def sync!
       head = @client.latest_block - Chain::Config.confirmations
-      from = @sync.last_synced_block.zero? ? 0 : @sync.last_synced_block + 1
+      # Fresh cursor → begin at the configured deploy block, NOT genesis. Scanning
+      # from block 0 on a live chain is millions of blocks / thousands of RPC calls.
+      from = @sync.last_synced_block.zero? ? Chain::Config.start_block : @sync.last_synced_block + 1
       return @sync.last_synced_block if head < from
 
       from.step(head, MAX_BLOCK_SPAN) do |window_start|
@@ -61,7 +63,7 @@ module Chain
                Bounty.find_by(chain_bounty_id: bounty_id)
       return unless bounty # funded outside our platform; v1 ignores (logged upstream)
 
-      was_funded = bounty.funded?
+      was_pending = bounty.pending?
       bounty.update!(
         chain_bounty_id: bounty_id,
         amount: amount,
@@ -71,9 +73,11 @@ module Chain
         status: :funded
       )
 
-      # Announce on the issue only on the pending -> funded transition (build
-      # plan §1.2 step 3), so a redelivered/re-synced log never double-comments.
-      Bounties::Announcer.announce_funded(bounty) unless was_funded
+      # Announce only on the genuine pending -> funded transition (build plan
+      # §1.2 step 3). Gating on `pending` (not merely "not funded") means a full
+      # rebuild that replays Funded over an already-disbursed/refunded bounty
+      # never re-posts the comment.
+      Bounties::Announcer.announce_funded(bounty) if was_pending
     end
 
     def on_disbursed(log)
