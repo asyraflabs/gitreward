@@ -48,6 +48,28 @@ Network params (non-secret) are in `config/chain.yml`, overridable by env
 (`CHAIN_RPC_URL`, `USDC_ADDRESS`, `ESCROW_ADDRESS`, …). Addresses are quoted —
 unquoted `0x…` is parsed by YAML as a hex integer.
 
+## Background jobs (Solid Queue)
+
+Development uses **Solid Queue** (DB-backed ActiveJob, no Redis), the same as
+production. One-time setup creates the queue database from `db/queue_schema.rb`:
+
+```bash
+bin/rails db:prepare
+```
+
+Jobs (webhook handling → disbursement, and the recurring `IndexChainEventsJob`
+that syncs Funded/Disbursed/Refunded into the DB cache) run **only while
+`bin/jobs` is running** — it's a separate process from the web server. Run both:
+
+```bash
+bin/rails server -p 3000   # web: receives webhooks, enqueues jobs
+bin/jobs                    # worker: processes jobs + recurring indexer (every 15s, see config/recurring.yml)
+```
+
+Both processes need the chain env (see below). The chain is the source of truth;
+the DB is a rebuildable mirror (C.1). Swapping Solid Queue for Sidekiq in
+production is a one-line adapter change (build plan §2).
+
 ## Local end-to-end on anvil (no testnet, no real funds)
 
 The dev oracle key is anvil account #0, so it matches `contracts/`'s test setup.
@@ -60,17 +82,26 @@ anvil
 cd ../contracts
 forge script script/DevDeploy.s.sol --rpc-url http://127.0.0.1:8545 --broadcast
 
-# 3. Run the app pointed at those addresses
+# 3. Run the app pointed at those addresses (web + jobs, two terminals)
 cd ../platform
-USDC_ADDRESS=0x… ESCROW_ADDRESS=0x… bin/dev
+USDC_ADDRESS=0x… ESCROW_ADDRESS=0x… bin/rails server -p 3000
+USDC_ADDRESS=0x… ESCROW_ADDRESS=0x… bin/jobs
 ```
 
-`bin/dev` runs the web server, the Tailwind watcher, and Solid Queue (which runs
-the recurring `IndexChainEventsJob` that syncs Funded/Disbursed/Refunded into the
-DB cache). The chain is the source of truth; the DB is a rebuildable mirror (C.1).
+## Pointing at Base Sepolia (or another network)
 
-> Jobs use plain ActiveJob on Solid Queue (Rails 8 default, no Redis). Swapping to
-> Sidekiq in production is a one-line adapter change (build plan §2).
+Set `CHAIN_NETWORK` + the network's params (keys are namespaced per network in
+credentials under `chain.<network>`). A convenient pattern is a gitignored env
+file sourced into both the web and jobs processes:
+
+```bash
+set -a && . ./.env.base_sepolia && set +a && bin/rails server -p 3000
+set -a && . ./.env.base_sepolia && set +a && bin/jobs
+```
+
+> Indexer note: the recurring job resumes from `chain_sync_state.last_synced_block`.
+> On a fresh cursor it would scan from block 0 — infeasible on a live chain — so
+> production needs a configurable deploy/start block (TODO).
 
 ## Tests
 
