@@ -24,6 +24,8 @@ module Chain
     def network         = settings.fetch(:network)
     def confirmations   = settings.fetch(:confirmations, 0).to_i
     def usdc_permit_version = settings.fetch(:usdc_permit_version, "2").to_s
+    def public_rpc_url  = settings.fetch(:public_rpc_url, rpc_url)
+    def chain_label     = settings.fetch(:chain_label, "chain #{chain_id}")
 
     # The crown jewel: authorizes payouts. Never logged, never plaintext env (A.5).
     def oracle_key

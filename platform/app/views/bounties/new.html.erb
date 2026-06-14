@@ -3,6 +3,8 @@
 <section class="max-w-xl"
   data-controller="wallet"
   data-wallet-chain-id-value="<%= Chain::Config.chain_id %>"
+  data-wallet-chain-name-value="<%= Chain::Config.chain_label %>"
+  data-wallet-rpc-url-value="<%= Chain::Config.public_rpc_url %>"
   data-wallet-escrow-value="<%= Chain::Config.escrow_address %>"
   data-wallet-usdc-value="<%= Chain::Config.usdc_address %>"
   data-wallet-usdc-version-value="<%= Chain::Config.usdc_permit_version %>"

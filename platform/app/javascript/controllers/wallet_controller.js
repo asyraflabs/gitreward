@@ -12,7 +12,8 @@ export default class extends Controller {
   static targets = ["issue", "branch", "amount", "expiry", "submit", "status", "feeLabel"]
   static values = {
     chainId: Number, escrow: String, usdc: String, usdcVersion: String,
-    feeBps: Number, createUrl: String, repositoryId: Number, csrf: String
+    feeBps: Number, createUrl: String, repositoryId: Number, csrf: String,
+    rpcUrl: String, chainName: String
   }
 
   // Minimal ABIs (the only functions we touch in-browser).
@@ -34,10 +35,30 @@ export default class extends Controller {
   chain() {
     return defineChain({
       id: this.chainIdValue,
-      name: `chain-${this.chainIdValue}`,
+      name: this.chainNameValue || `chain-${this.chainIdValue}`,
       nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-      rpcUrls: { default: { http: [] } }
+      rpcUrls: { default: { http: this.rpcUrlValue ? [this.rpcUrlValue] : [] } }
     })
+  }
+
+  // Make sure the wallet is on our chain BEFORE any contract read. Reading
+  // USDC.name() while the wallet is on the wrong network returns "0x" (no code
+  // at that address there) — the confusing first-click error. Switch (and add
+  // the network if the wallet doesn't know it) so that can't happen.
+  async ensureChain(wallet) {
+    const current = await wallet.getChainId()
+    if (current === this.chainIdValue) return
+
+    this.busy(`Switch your wallet to ${this.chainNameValue || "the right network"}…`)
+    try {
+      await wallet.switchChain({ id: this.chainIdValue })
+    } catch (e) {
+      const unknownChain = e?.code === 4902 || /unrecognized|not been added|4902|does not match/i.test(`${e?.message} ${e?.cause?.message}`)
+      if (!unknownChain) throw e
+      // Wallet doesn't have the network yet — add it, then switch.
+      await wallet.addChain({ chain: this.chain() })
+      await wallet.switchChain({ id: this.chainIdValue })
+    }
   }
 
   async fund(event) {
@@ -63,8 +84,11 @@ export default class extends Controller {
       this.busy("Connecting wallet…")
       const chain = this.chain()
       const wallet = createWalletClient({ chain, transport: custom(window.ethereum) })
-      const pub = createPublicClient({ chain, transport: custom(window.ethereum) })
       const [account] = await wallet.requestAddresses()
+
+      // Get on the right network first, then build the read client against it.
+      await this.ensureChain(wallet)
+      const pub = createPublicClient({ chain, transport: custom(window.ethereum) })
 
       this.busy("Reading USDC permit details…")
       const [tokenName, nonce] = await Promise.all([

@@ -13,6 +13,9 @@ development:
   usdc_address: "<%= ENV.fetch("USDC_ADDRESS", "0x0000000000000000000000000000000000000000") %>"
   escrow_address: "<%= ENV.fetch("ESCROW_ADDRESS", "0x0000000000000000000000000000000000000000") %>"
   usdc_permit_version: "1"   # MockUSDC uses OZ ERC20Permit default version "1"
+  # Browser-safe RPC + label for the funding controller's network switch/add.
+  public_rpc_url: "<%= ENV.fetch("PUBLIC_RPC_URL", "http://127.0.0.1:8545") %>"
+  chain_label: "Anvil (local)"
   confirmations: 0
 
 test:
@@ -22,6 +25,8 @@ test:
   usdc_address: "0x0000000000000000000000000000000000000000"
   escrow_address: "0x0000000000000000000000000000000000000000"
   usdc_permit_version: "1"
+  public_rpc_url: "http://127.0.0.1:8545"
+  chain_label: "Anvil (local)"
   confirmations: 0
 
 production:
@@ -30,5 +35,8 @@ production:
   rpc_url: <%= ENV.fetch("CHAIN_RPC_URL", "https://sepolia.base.org") %>
   usdc_address: "<%= ENV.fetch("USDC_ADDRESS", "0x036CbD53842c5426634e7929541eC2318f3dCF7e") %>"
   escrow_address: "<%= ENV.fetch("ESCROW_ADDRESS", "") %>"
-  usdc_permit_version: <%= ENV.fetch("USDC_PERMIT_VERSION", "2") %>  # Circle USDC permit domain version
+  usdc_permit_version: "<%= ENV.fetch("USDC_PERMIT_VERSION", "2") %>"  # Circle USDC permit domain version
+  # Browser-safe public RPC for wallet network-add (NOT the server's possibly-authenticated rpc_url).
+  public_rpc_url: "<%= ENV.fetch("PUBLIC_RPC_URL", "https://sepolia.base.org") %>"
+  chain_label: "<%= ENV.fetch("CHAIN_LABEL", "Base Sepolia") %>"
   confirmations: <%= ENV.fetch("CHAIN_CONFIRMATIONS", 2) %>
