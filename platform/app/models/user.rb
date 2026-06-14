@@ -15,6 +15,14 @@ class User < ApplicationRecord
     wallet_links.find_by(active: true)
   end
 
+  # Heal the "installed the App before I ever logged in" ordering: adopt any
+  # unlinked installation on this user's own account (account id == our github
+  # id). Org installs link via the webhook sender instead. Idempotent.
+  def claim_installations!
+    Installation.where(account_github_id: github_user_id, installed_by_user_id: nil)
+                .update_all(installed_by_user_id: id)
+  end
+
   def wallet_linked?
     active_wallet.present?
   end

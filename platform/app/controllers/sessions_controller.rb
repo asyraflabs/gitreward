@@ -9,6 +9,7 @@ class SessionsController < ApplicationController
   def create
     auth = request.env["omniauth.auth"]
     user = User.from_github_auth(auth)
+    user.claim_installations! # adopt installs done before this first login
     reset_session
     session[:user_id] = user.id
     redirect_to dashboard_path, notice: "Signed in as #{user.github_login}."

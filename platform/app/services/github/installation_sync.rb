@@ -14,7 +14,9 @@ module Github
       install = Installation.find_or_initialize_by(github_installation_id: installation_id)
       install.account_type = (meta[:target_type] || account[:type]).to_s.downcase
       install.account_github_id = account[:id]
-      install.installed_by_user = installed_by if installed_by
+      # Link the installer only if not already linked, so a later re-sync (e.g.
+      # repos added by a different org member) never clobbers the original.
+      install.installed_by_user ||= installed_by
       install.suspended_at = meta[:suspended_at]
       install.save!
 
