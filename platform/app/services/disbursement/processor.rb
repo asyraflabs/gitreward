@@ -15,7 +15,13 @@ module Disbursement
     end
 
     def call
-      attestation = build_attestation! # raises AlreadyProcessed if one exists
+      existing = Attestation.find_by(bounty_id: @bounty.id)
+      # "Done" means a tx was actually submitted — not merely that we started.
+      # A prior attempt that died before submitting (e.g. a gas error) leaves an
+      # attestation with no tx_hash, and we retry it here rather than skip.
+      raise AlreadyProcessed, "bounty #{@bounty.id} already disbursed" if existing&.submitted_tx_hash.present?
+
+      attestation = existing || create_attestation
       signed = Chain::AttestationSigner.sign(chain_bounty_id: @bounty.chain_bounty_id, recipient: @recipient)
       attestation.update!(signature: signed[:signature], signed_at: Time.current)
 
@@ -30,9 +36,9 @@ module Disbursement
 
     private
 
-    # Atomic idempotency: the unique index on attestations.bounty_id guarantees a
-    # single disbursement attestation per bounty even under concurrent webhooks.
-    def build_attestation!
+    # The unique index on attestations.bounty_id guarantees a single attestation
+    # per bounty even under concurrent webhooks; the loser re-finds the winner's.
+    def create_attestation
       Attestation.create!(
         bounty: @bounty,
         recipient_address: @recipient,
@@ -42,7 +48,7 @@ module Disbursement
         signed_at: Time.current
       )
     rescue ActiveRecord::RecordNotUnique
-      raise AlreadyProcessed, "bounty #{@bounty.id} already has an attestation"
+      Attestation.find_by!(bounty_id: @bounty.id)
     end
   end
 end

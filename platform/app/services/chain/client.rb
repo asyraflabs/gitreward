@@ -56,13 +56,25 @@ module Chain
     # --- the one state-changing call the backend makes ---
     # Submitted by the relayer; the contract trusts the SIGNATURE, not the sender.
     DISBURSE_GAS_LIMIT = 200_000 # measured ~100-130k; headroom for fee transfer
+    MIN_PRIORITY_FEE = 1_000_000 # 0.001 gwei floor (Base accepts tiny tips)
+    FALLBACK_BASE_FEE = 1_000_000_000 # 1 gwei if the node won't report baseFeePerGas
 
     class DisburseFailed < StandardError; end
 
     # Returns the tx hash on success. eth.rb's transact_and_wait returns
     # [tx_hash, success_bool]; we raise on a reverted tx so the caller doesn't
-    # record a bogus disbursement.
+    # record a bogus disbursement. Gas is priced off the live base fee — eth.rb's
+    # default maxFee is ~42 gwei, which on a sub-gwei chain like Base makes the
+    # upfront balance check (gas_limit * maxFee) demand far more ETH than the tx
+    # actually costs.
     def disburse(chain_bounty_id:, recipient:, signature:)
+      base = base_fee_per_gas
+      priority = [base, MIN_PRIORITY_FEE].max
+      # eth.rb builds the 1559 tx from these client attributes (not kwargs); its
+      # defaults are tens of gwei, which blows the upfront balance check on Base.
+      @eth.max_priority_fee_per_gas = priority
+      @eth.max_fee_per_gas = base * 3 + priority # buffer for base-fee rise
+
       tx_hash, success = @eth.transact_and_wait(
         @escrow, "disburse", chain_bounty_id, recipient, hex_to_bin(signature),
         sender_key: Chain::Config.relayer_key, gas_limit: DISBURSE_GAS_LIMIT
@@ -70,6 +82,11 @@ module Chain
       raise DisburseFailed, "disburse tx #{tx_hash} reverted" unless success
 
       tx_hash
+    end
+
+    def base_fee_per_gas
+      bf = rpc("eth_getBlockByNumber", ["latest", false])&.dig("baseFeePerGas")
+      bf ? bf.to_i(16) : FALLBACK_BASE_FEE
     end
 
     # --- logs for the indexer ---
