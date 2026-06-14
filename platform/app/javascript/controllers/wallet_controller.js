@@ -77,8 +77,12 @@ export default class extends Controller {
     if (!days || days < 7) return this.fail("Expiry must be at least 7 days.")
 
     const amount = parseUnits(usdcAmount, 6)               // USDC base units (6 decimals)
-    const expiry = BigInt(Math.floor(Date.now() / 1000) + days * 86400)
-    const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600)
+    // +1h buffer so a `days`-day expiry clears the contract's `now + days` minimum
+    // even though the chain's block.timestamp runs a few seconds ahead of Date.now()
+    // (without it, selecting the exact 7-day minimum reverts with ExpiryTooSoon).
+    const now = Math.floor(Date.now() / 1000)
+    const expiry = BigInt(now + days * 86400 + 3600)
+    const deadline = BigInt(now + 3600)
 
     try {
       this.busy("Connecting wallet…")
