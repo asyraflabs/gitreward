@@ -18,9 +18,8 @@ Rails.application.routes.draw do
   # --- Maintainer funding flow ---
   resources :bounties, only: %i[index show new create]
 
-  # --- Discovery + trust ---
+  # --- Discovery (unlisted in nav until there's traction) ---
   get "/directory" => "directory#index", as: :directory
-  get "/trust" => "trust#index", as: :trust
 
   # Dashboard / landing
   get "/dashboard" => "dashboard#show", as: :dashboard

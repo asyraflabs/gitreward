@@ -26,8 +26,6 @@
           <span class="text-emerald-600">◈</span> GitReward
         <% end %>
         <div class="flex items-center gap-4 text-sm">
-          <%= link_to "Bounties", directory_path, class: "hover:text-emerald-600" %>
-          <%= link_to "Trust", trust_path, class: "hover:text-emerald-600" %>
           <% if signed_in? %>
             <%= link_to "Dashboard", dashboard_path, class: "hover:text-emerald-600" %>
             <span class="flex items-center gap-2">
