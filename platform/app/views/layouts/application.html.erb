@@ -27,7 +27,6 @@
         <% end %>
         <div class="flex items-center gap-4 text-sm">
           <% if signed_in? %>
-            <%= link_to "Dashboard", dashboard_path, class: "hover:text-emerald-600" %>
             <span class="flex items-center gap-2">
               <%= image_tag current_user.github_avatar_url, class: "w-6 h-6 rounded-full", alt: "" if current_user.github_avatar_url %>
               <%= current_user.github_login %>
