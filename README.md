@@ -25,10 +25,16 @@ See [`LICENSING.md`](./LICENSING.md) for the open-core split.
 
 | Phase | What | State |
 |-------|------|-------|
-| 1 | Protocol design (frozen spec — Appendix A) | ✅ Frozen |
-| 2 | Smart contract + tests on Base Sepolia | 🚧 In progress |
-| 3 | Rails platform (web + oracle + relayer) | ✅ Built; validated end-to-end on local anvil |
-| 4 | Audit / testnet beta / mainnet | ⬜ Not started |
+| 1 | Protocol design (frozen spec — Appendix A) | ✅ Frozen; cross-language EIP-712 gate proven |
+| 2 | Smart contract + tests | ✅ Built (37 tests: unit/fuzz/adversarial); deployed & exercised on Base Sepolia |
+| 3 | Rails platform (web + oracle + relayer) | ✅ Full flow validated end-to-end on Base Sepolia (real testnet USDC) |
+| 5 | Open-source & business setup | 🟡 Licensing done; CLA + self-hoster guide pending |
+| 7 | Key management (§7) | 🟡 v1 baseline (keys in encrypted credentials, oracle/relayer split); hardening deferred to v2 (Appendix B.3) |
+| 4 | Hardening: audit · testnet beta · mainnet | ⬜ Not started (gates mainnet) |
+
+> Note: the Base Sepolia run was a **solo self-test** (functionality), not the
+> Phase 4 **testnet beta** with the waitlist (demand). Per Appendix B.4, that work
+> de-risks functionality, not key-theft exposure.
 
 ## Contracts — quick start
 
@@ -45,3 +51,15 @@ sender — a leaked relayer key cannot redirect funds.
 
 See [`contracts/README.md`](./contracts/README.md) for the contract interface
 and the EIP-712 attestation definition.
+
+## Platform — quick start
+
+```bash
+cd platform
+bin/rails db:prepare      # one-time: app DB + Solid Queue tables
+bin/rails server          # web (receives webhooks, enqueues jobs)
+bin/jobs                  # worker: disbursement + recurring indexer (separate process)
+```
+
+Defaults to local anvil; point at a real network with `CHAIN_NETWORK` + env (see
+[`platform/README.md`](./platform/README.md) for the full local/testnet runbook).
