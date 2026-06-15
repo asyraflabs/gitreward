@@ -20,6 +20,7 @@
   </div>
 
   <div class="card card-pad" style="margin-top: 24px">
+    <div>
     <div class="kv"><span class="kv-k">Reward</span><span class="kv-v"><span class="amount accent" style="font-size: 16px"><%= @bounty.amount_usdc || "—" %><span class="unit">USDC</span></span></span></div>
     <div class="kv"><span class="kv-k">Platform fee</span><span class="kv-v"><%= @bounty.fee_bps_snapshot ? "#{@bounty.fee_bps_snapshot / 100.0}%" : "—" %></span></div>
     <% if @bounty.payout_base_units %>
@@ -33,6 +34,7 @@
     <% if @bounty.recipient_address %>
       <div class="kv"><span class="kv-k">Paid to</span><span class="kv-v" style="font-size: 12.5px"><%= @bounty.recipient_address %></span></div>
     <% end %>
+    </div>
 
     <% if @bounty.fund_tx_hash %>
       <hr class="divider" style="margin: 6px 0 16px">
