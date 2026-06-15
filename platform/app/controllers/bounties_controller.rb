@@ -6,7 +6,9 @@ class BountiesController < ApplicationController
     @bounties = current_user.bounties.order(created_at: :desc).includes(:repository)
   end
 
-  def show; end
+  def show
+    @issue_title = issue_title_for(@bounty)
+  end
 
   # Funding form: pick one of the maintainer's open issues, set amount + expiry.
   # The actual fund tx is signed in the browser (viem); see wallet_controller.js.
@@ -53,6 +55,19 @@ class BountiesController < ApplicationController
 
   def set_bounty
     @bounty = Bounty.includes(:repository, :attestation).find(params[:id])
+  end
+
+  # Live issue title from GitHub (cached). Falls back to nil so the view shows
+  # "Issue #N" if the App can't read it.
+  def issue_title_for(bounty)
+    repo = bounty.repository
+    Rails.cache.fetch("issue_title/#{repo.github_repo_id}/#{bounty.github_issue_number}", expires_in: 1.hour) do
+      Github::RepoClient.new(repo.installation.github_installation_id)
+                        .issue(repo.full_name, bounty.github_issue_number)[:title]
+    end
+  rescue StandardError => e
+    Rails.logger.info("issue_title_for(#{bounty.id}) failed: #{e.message}")
+    nil
   end
 
   def current_user_repositories

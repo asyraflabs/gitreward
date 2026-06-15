@@ -1,18 +1,21 @@
 <% content_for :title, "Bounty ##{@bounty.id}" %>
 
 <div class="wrap screen page-narrow">
-  <%= link_to directory_path, class: "link link-muted", style: "margin-bottom: 20px" do %>
-    <span style="transform: rotate(180deg); display: inline-flex"><%= icon(:arrow, 14) %></span> All bounties
-  <% end %>
+  <div style="margin-bottom: 18px">
+    <%= link_to (signed_in? ? dashboard_path : directory_path), class: "link link-muted" do %>
+      <span style="transform: rotate(180deg); display: inline-flex"><%= icon(:arrow, 14) %></span>
+      <%= signed_in? ? "Dashboard" : "All bounties" %>
+    <% end %>
+  </div>
 
-  <div style="margin-top: 20px; margin-bottom: 10px; display: inline-flex; align-items: center; gap: 8px; color: var(--tx-2); font-size: 13.5px">
+  <div style="margin-bottom: 11px; display: flex; align-items: center; gap: 8px; color: var(--tx-2); font-size: 13.5px">
     <span style="color: var(--tx-3); display: inline-flex"><%= icon(:repo, 16) %></span><%= @bounty.repository.full_name %>
   </div>
   <div style="display: flex; align-items: center; gap: 11px; margin-bottom: 11px">
     <span style="color: var(--tx-2); font-weight: 600; font-size: 15px">#<%= @bounty.github_issue_number %></span>
     <%= render "bounties/status_badge", bounty: @bounty %>
   </div>
-  <h1 class="h-page" style="font-size: 26px">Issue #<%= @bounty.github_issue_number %></h1>
+  <h1 class="h-page" style="font-size: 26px"><%= @issue_title.presence || "Issue ##{@bounty.github_issue_number}" %></h1>
   <div style="margin-top: 13px">
     <%= link_to @bounty.issue_url, class: "link link-muted", style: "font-size: 14px", target: "_blank", rel: "noopener" do %>
       View issue on GitHub <%= icon(:ext, 14) %>
