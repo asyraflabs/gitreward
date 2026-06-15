@@ -1,64 +1,68 @@
 <% content_for :title, "GitReward — bounties that pay themselves" %>
 
-<section class="max-w-3xl">
-  <h1 class="text-4xl font-bold tracking-tight">Bounties for GitHub issues that pay themselves.</h1>
-  <p class="mt-4 text-lg text-slate-600">
-    Maintainers fund their own issues with USDC on Base. When a PR is merged, the
-    bounty disburses automatically to the contributor's linked wallet — no claim,
-    no invoice, no middleman holding the money.
-  </p>
+<div class="wrap screen">
+  <section class="hero">
+    <h1>Bounties for GitHub issues<br>that pay themselves.</h1>
+    <p>
+      Maintainers fund their own issues with USDC on Base. When a PR is merged, the
+      bounty disburses automatically to the contributor's linked wallet — no claim,
+      no invoice, no middleman holding the money.
+    </p>
+    <div class="hero-cta">
+      <%= button_to github_auth_path, method: :post, data: { turbo: false }, class: "btn btn-primary btn-lg" do %>
+        Sign in with GitHub
+      <% end %>
+      <%= link_to "How it works", "#faq", class: "btn btn-ghost btn-lg" %>
+    </div>
+  </section>
 
-  <div class="mt-6 flex gap-3">
-    <%= button_to "Sign in with GitHub", github_auth_path, method: :post, data: { turbo: false },
-          class: "bg-slate-900 text-white px-5 py-2.5 rounded-md font-medium hover:bg-slate-700" %>
-    <%= link_to "How it works", "#faq",
-          class: "px-5 py-2.5 rounded-md font-medium border border-slate-300 hover:border-slate-400" %>
-  </div>
+  <section class="feature-grid">
+    <div class="card card-pad">
+      <div class="feature-icon"><%= icon(:pin, 22) %></div>
+      <h3 class="h-sec">Post a bounty</h3>
+      <p class="card-desc">Pick one of your open issues and fund it with USDC. The funds lock in an open-source escrow contract on Base — you only pay gas.</p>
+    </div>
+    <div class="card card-pad">
+      <div class="feature-icon"><%= icon(:pull_request, 22) %></div>
+      <h3 class="h-sec">Solve &amp; merge</h3>
+      <p class="card-desc">Contributors open a PR that closes the issue. Merge it into your target branch — the merge is the authorization, nothing else to click.</p>
+    </div>
+    <div class="card card-pad">
+      <div class="feature-icon"><%= icon(:dollar, 22) %></div>
+      <h3 class="h-sec">Get paid</h3>
+      <p class="card-desc">The bounty disburses automatically to the contributor's linked wallet, minus a small fee. Unmatched bounties refund to the funder on a timer.</p>
+    </div>
+  </section>
 
-  <div class="mt-12 grid sm:grid-cols-3 gap-6 text-sm">
-    <div class="bg-white p-4 rounded-lg border border-slate-200">
-      <div class="font-semibold">Non-custodial</div>
-      <p class="text-slate-600 mt-1">Funds sit in an open-source escrow contract, not our bank account. You only pay gas to fund.</p>
-    </div>
-    <div class="bg-white p-4 rounded-lg border border-slate-200">
-      <div class="font-semibold">Self-refunding</div>
-      <p class="text-slate-600 mt-1">No merge before expiry? The maintainer refunds themselves, permissionlessly. No one can strand your money.</p>
-    </div>
-    <div class="bg-white p-4 rounded-lg border border-slate-200">
-      <div class="font-semibold">One neutral oracle</div>
-      <p class="text-slate-600 mt-1">We turn a merge into a signed payout authorization — and only that. See <%= link_to "how your money is handled", "#faq", class: "underline" %>.</p>
-    </div>
-  </div>
-</section>
+  <section id="faq" class="faq" style="scroll-margin-top: 24px">
+    <h2 class="h-page" style="font-size: 24px">How your money is handled</h2>
+    <p class="sub">Plain English — non-custodial, one neutral oracle, you only pay gas to fund.</p>
 
-<section id="faq" class="max-w-3xl mt-20 scroll-mt-8">
-  <h2 class="text-2xl font-bold">How your money is handled</h2>
-  <p class="mt-2 text-slate-600">Plain English — non-custodial, one neutral oracle, you only pay gas to fund.</p>
-
-  <dl class="mt-8 space-y-8">
-    <div>
-      <dt class="font-semibold text-lg">Where does the money sit?</dt>
-      <dd class="mt-1 text-slate-700">In an open-source escrow contract on Base — not in our bank account. We can't spend it and we can't stop a refund. You only pay gas to fund it.</dd>
+    <div style="margin-top: 24px">
+      <div class="faq-item">
+        <h3 class="faq-q">Where does the money sit?</h3>
+        <p class="faq-a">In an open-source escrow contract on Base — not in our bank account. We can't spend it and we can't stop a refund. You only pay gas to fund it.</p>
+      </div>
+      <div class="faq-item">
+        <h3 class="faq-q">What do I actually trust you with?</h3>
+        <p class="faq-a">One thing: when a bounty PR is merged, we (a single neutral oracle) sign a message that says “pay this contributor.” The contract checks our signature and pays out. That signature is the only power we hold — and it can only pay the address the contributor themselves linked. It cannot redirect funds anywhere else.</p>
+      </div>
+      <div class="faq-item">
+        <h3 class="faq-q">What if GitReward disappears?</h3>
+        <p class="faq-a">Every unmatched bounty refunds to the funder after its expiry, with no action from us and no fee. The self-refund timer is the backstop — no one can strand your money, even if we vanish.</p>
+      </div>
+      <div class="faq-item">
+        <h3 class="faq-q">How does a contributor get paid?</h3>
+        <p class="faq-a">They link a payout wallet once, then solve issues normally. On merge, the bounty disburses to that wallet automatically — no claim step, no invoice. If they haven't linked a wallet by merge time, the bounty simply refunds to the maintainer at expiry.</p>
+      </div>
+      <div class="faq-item">
+        <h3 class="faq-q">What's the fee?</h3>
+        <p class="faq-a">A small protocol fee on payout, hard-capped <em>in the contract</em> at 10% — we literally cannot charge more, by design. That's well under the 20%+ that's normal elsewhere. Self-hosters can run it fee-free.</p>
+      </div>
+      <div class="faq-item">
+        <h3 class="faq-q">Is it really “trustless”?</h3>
+        <p class="faq-a">No — and we won't claim that. It's non-custodial with one neutral oracle. That's an honest, smaller claim than “trustless,” and it's the one we can actually stand behind.</p>
+      </div>
     </div>
-    <div>
-      <dt class="font-semibold text-lg">What do I actually trust you with?</dt>
-      <dd class="mt-1 text-slate-700">One thing: when a bounty PR is merged, we (a single neutral oracle) sign a message that says “pay this contributor.” The contract checks our signature and pays out. That signature is the only power we hold — and it can only pay the address the contributor themselves linked. It cannot redirect funds anywhere else.</dd>
-    </div>
-    <div>
-      <dt class="font-semibold text-lg">What if GitReward disappears?</dt>
-      <dd class="mt-1 text-slate-700">Every unmatched bounty refunds to the funder after its expiry, with no action from us and no fee. The self-refund timer is the backstop — no one can strand your money, even if we vanish.</dd>
-    </div>
-    <div>
-      <dt class="font-semibold text-lg">How does a contributor get paid?</dt>
-      <dd class="mt-1 text-slate-700">They link a payout wallet once, then solve issues normally. On merge, the bounty disburses to that wallet automatically — no claim step, no invoice. If they haven't linked a wallet by merge time, the bounty simply refunds to the maintainer at expiry.</dd>
-    </div>
-    <div>
-      <dt class="font-semibold text-lg">What's the fee?</dt>
-      <dd class="mt-1 text-slate-700">A small protocol fee on payout, hard-capped <em>in the contract</em> at 10% — we literally cannot charge more, by design. That's well under the 20%+ that's normal elsewhere. Self-hosters can run it fee-free.</dd>
-    </div>
-    <div>
-      <dt class="font-semibold text-lg">Is it really “trustless”?</dt>
-      <dd class="mt-1 text-slate-700">No — and we won't claim that. It's non-custodial with one neutral oracle. That's an honest, smaller claim than “trustless,” and it's the one we can actually stand behind.</dd>
-    </div>
-  </dl>
-</section>
+  </section>
+</div>

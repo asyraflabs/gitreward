@@ -1,45 +1,55 @@
 <% content_for :title, "Bounty ##{@bounty.id}" %>
 
-<section class="max-w-2xl">
-  <div class="flex items-center gap-3">
-    <h1 class="text-2xl font-bold"><%= @bounty.repository.full_name %> #<%= @bounty.github_issue_number %></h1>
+<div class="wrap screen page-narrow">
+  <%= link_to directory_path, class: "link link-muted", style: "margin-bottom: 20px" do %>
+    <span style="transform: rotate(180deg); display: inline-flex"><%= icon(:arrow, 14) %></span> All bounties
+  <% end %>
+
+  <div style="margin-top: 20px; margin-bottom: 10px; display: inline-flex; align-items: center; gap: 8px; color: var(--tx-2); font-size: 13.5px">
+    <span style="color: var(--tx-3); display: inline-flex"><%= icon(:repo, 16) %></span><%= @bounty.repository.full_name %>
+  </div>
+  <div style="display: flex; align-items: center; gap: 11px; margin-bottom: 11px">
+    <span style="color: var(--tx-2); font-weight: 600; font-size: 15px">#<%= @bounty.github_issue_number %></span>
     <%= render "bounties/status_badge", bounty: @bounty %>
   </div>
-  <%= link_to "View issue on GitHub →", @bounty.issue_url, class: "mt-1 inline-block text-sm text-emerald-600 hover:underline", target: "_blank", rel: "noopener" %>
+  <h1 class="h-page" style="font-size: 26px">Issue #<%= @bounty.github_issue_number %></h1>
+  <div style="margin-top: 13px">
+    <%= link_to @bounty.issue_url, class: "link link-muted", style: "font-size: 14px", target: "_blank", rel: "noopener" do %>
+      View issue on GitHub <%= icon(:ext, 14) %>
+    <% end %>
+  </div>
 
-  <dl class="mt-6 grid grid-cols-2 gap-y-3 text-sm bg-white p-5 rounded-lg border border-slate-200">
-    <dt class="text-slate-500">Amount</dt>
-    <dd class="font-medium"><%= @bounty.amount_usdc ? "#{@bounty.amount_usdc} USDC" : "—" %></dd>
-
-    <dt class="text-slate-500">Fee (snapshot)</dt>
-    <dd><%= @bounty.fee_bps_snapshot ? "#{@bounty.fee_bps_snapshot / 100.0}%" : "—" %></dd>
-
-    <dt class="text-slate-500">Target branch</dt>
-    <dd class="font-mono"><%= @bounty.target_branch %></dd>
-
-    <dt class="text-slate-500">Expiry</dt>
-    <dd><%= @bounty.expiry ? "#{@bounty.expiry.to_date} (#{time_ago_in_words(@bounty.expiry)} #{@bounty.expiry.past? ? 'ago' : 'from now'})" : "—" %></dd>
-
+  <div class="card card-pad" style="margin-top: 24px">
+    <div class="kv"><span class="kv-k">Reward</span><span class="kv-v"><span class="amount accent" style="font-size: 16px"><%= @bounty.amount_usdc || "—" %><span class="unit">USDC</span></span></span></div>
+    <div class="kv"><span class="kv-k">Platform fee</span><span class="kv-v"><%= @bounty.fee_bps_snapshot ? "#{@bounty.fee_bps_snapshot / 100.0}%" : "—" %></span></div>
+    <% if @bounty.payout_base_units %>
+      <div class="kv"><span class="kv-k">Net to solver</span><span class="kv-v" style="color: var(--green)"><%= @bounty.payout_base_units.to_d / Bounty::USDC_UNIT %> USDC</span></div>
+    <% end %>
+    <div class="kv"><span class="kv-k">Target branch</span><span class="kv-v"><span class="code-chip"><%= @bounty.target_branch %></span></span></div>
+    <div class="kv"><span class="kv-k">Expiry</span><span class="kv-v"><%= @bounty.expiry&.to_date %></span></div>
     <% if @bounty.chain_bounty_id %>
-      <dt class="text-slate-500">On-chain bounty id</dt>
-      <dd class="font-mono"><%= @bounty.chain_bounty_id %></dd>
+      <div class="kv"><span class="kv-k">On-chain id</span><span class="kv-v">#<%= @bounty.chain_bounty_id %></span></div>
     <% end %>
-
     <% if @bounty.recipient_address %>
-      <dt class="text-slate-500">Paid to</dt>
-      <dd class="font-mono break-all"><%= @bounty.recipient_address %></dd>
+      <div class="kv"><span class="kv-k">Paid to</span><span class="kv-v" style="font-size: 12.5px"><%= @bounty.recipient_address %></span></div>
     <% end %>
-  </dl>
 
-  <% if @bounty.pending? %>
-    <p class="mt-4 text-sm text-slate-500">⏳ Waiting for the fund transaction to confirm on-chain. This becomes <strong>funded</strong> once the indexer sees the <code>Funded</code> event.</p>
-  <% elsif @bounty.funded? %>
-    <p class="mt-4 text-sm text-slate-600">Open a PR that closes <code>#<%= @bounty.github_issue_number %></code> and merge it into <code><%= @bounty.target_branch %></code> to disburse, or refund yourself after expiry.</p>
-  <% elsif @bounty.disbursed? && @bounty.attestation %>
-    <p class="mt-4 text-sm text-slate-600">Disbursed for <code><%= @bounty.attestation.pr_ref %></code>.</p>
-  <% end %>
+    <% if @bounty.fund_tx_hash %>
+      <hr class="divider" style="margin: 6px 0 16px">
+      <div class="eyebrow" style="margin-bottom: 8px">Funding transaction</div>
+      <%= render "ui/copy_chip", value: @bounty.fund_tx_hash %>
+    <% end %>
+  </div>
 
-  <% if @bounty.fund_tx_hash %>
-    <p class="mt-4 text-xs text-slate-400">Fund tx: <span class="font-mono break-all"><%= @bounty.fund_tx_hash %></span></p>
-  <% end %>
-</section>
+  <p class="sub" style="text-align: center; font-size: 13px; margin-top: 16px">
+    <% if @bounty.pending? %>
+      ⏳ Waiting for the fund transaction to confirm — this becomes <strong style="color: var(--tx-2)">funded</strong> once the indexer sees the on-chain event.
+    <% elsif @bounty.funded? %>
+      Open a PR that closes #<%= @bounty.github_issue_number %> and merge it into <span style="color: var(--tx-2); font-weight: 500"><%= @bounty.target_branch %></span> to disburse — or refund yourself after expiry.
+    <% elsif @bounty.disbursed? %>
+      Paid out<%= " for #{@bounty.attestation.pr_ref}" if @bounty.attestation %>. Thanks for using GitReward.
+    <% elsif @bounty.refunded? %>
+      Refunded to the funder after expiry.
+    <% end %>
+  </p>
+</div>

@@ -1,11 +1,12 @@
-<%
-  styles = {
-    "pending"   => "bg-slate-100 text-slate-600",
-    "funded"    => "bg-emerald-100 text-emerald-700",
-    "disbursed" => "bg-blue-100 text-blue-700",
-    "refunded"  => "bg-amber-100 text-amber-700"
-  }
+<%#
+  Maps our Bounty statuses to the design-system badge styles:
+    funded → orange "Funded", disbursed → green "Paid out",
+    refunded → muted "Refunded", pending → amber "Pending".
 %>
-<span class="inline-block px-2 py-0.5 rounded text-xs font-medium <%= styles[bounty.status] %>">
-  <%= bounty.status %>
-</span>
+<% klass, label = {
+     "funded"    => ["badge-funded", "Funded"],
+     "disbursed" => ["badge-paid",   "Paid out"],
+     "refunded"  => ["badge-open",   "Refunded"],
+     "pending"   => ["badge-pending","Pending"]
+   }[bounty.status] || ["badge-open", bounty.status.to_s.capitalize] %>
+<span class="badge <%= klass %>"><%= label %></span>

@@ -1,0 +1,7 @@
+<%# locals: value: %>
+<button type="button" class="copy"
+        data-controller="clipboard" data-clipboard-text-value="<%= value %>"
+        data-action="clipboard#copy">
+  <span class="truncate"><%= value %></span>
+  <span data-clipboard-target="icon" style="color: var(--tx-3); flex-shrink: 0; display: inline-flex"><%= icon(:copy, 15) %></span>
+</button>

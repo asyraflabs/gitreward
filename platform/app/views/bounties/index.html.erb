@@ -1,23 +1,27 @@
 <% content_for :title, "Your bounties" %>
 
-<h1 class="text-2xl font-bold">Your bounties</h1>
+<div class="wrap screen page">
+  <h1 class="h-page">Your bounties</h1>
+  <p class="sub" style="margin-bottom: 26px">Issues you're currently funding.</p>
 
-<% if @bounties.any? %>
-  <table class="mt-4 w-full text-sm bg-white rounded-lg border border-slate-200 overflow-hidden">
-    <thead class="text-left text-slate-500 border-b border-slate-200 bg-slate-50">
-      <tr><th class="py-2 px-3">Issue</th><th>Amount</th><th>Status</th><th>Expiry</th></tr>
-    </thead>
-    <tbody>
-      <% @bounties.each do |b| %>
-        <tr class="border-b border-slate-100">
-          <td class="py-2 px-3"><%= link_to "#{b.repository.full_name}##{b.github_issue_number}", b, class: "text-emerald-600 hover:underline" %></td>
-          <td><%= b.amount_usdc ? "#{b.amount_usdc} USDC" : "—" %></td>
-          <td><%= render "bounties/status_badge", bounty: b %></td>
-          <td><%= b.expiry&.to_date %></td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-<% else %>
-  <p class="mt-4 text-sm text-slate-600">No bounties yet. <%= link_to "Fund one from your dashboard", dashboard_path, class: "text-emerald-600 hover:underline" %>.</p>
-<% end %>
+  <div class="card card-pad">
+    <% if @bounties.any? %>
+      <table class="tbl">
+        <thead><tr><th>Issue</th><th>Amount</th><th>Status</th><th>Expiry</th><th></th></tr></thead>
+        <tbody>
+          <% @bounties.each do |b| %>
+            <tr>
+              <td><span style="font-size: 13.5px"><%= b.repository.full_name %><span class="accent" style="margin-left: 1px"> #<%= b.github_issue_number %></span></span></td>
+              <td><% if b.amount_usdc %><span style="font-weight: 500"><%= b.amount_usdc %> <span style="color: var(--tx-3)">USDC</span></span><% else %><span style="color: var(--tx-3)">—</span><% end %></td>
+              <td><%= render "bounties/status_badge", bounty: b %></td>
+              <td><span style="color: var(--tx-2); font-size: 13.5px"><%= b.expiry&.to_date %></span></td>
+              <td style="text-align: right"><%= link_to b, class: "link", style: "font-size: 13px" do %>View <%= icon(:arrow, 13) %><% end %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p class="card-desc">No bounties yet. <%= link_to "Fund one from your dashboard", dashboard_path, class: "link" %>.</p>
+    <% end %>
+  </div>
+</div>

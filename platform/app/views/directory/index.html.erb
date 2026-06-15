@@ -1,39 +1,45 @@
 <% content_for :title, "Open bounties" %>
 
-<div>
-  <h1 class="text-2xl font-bold">Open bounties</h1>
-  <p class="mt-1 text-sm text-slate-600">Funded issues across every repo using GitReward. Solve one, link a wallet, get paid on merge.</p>
-</div>
-
-<% if @bounties.any? %>
-  <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-    <% @bounties.each do |b| %>
-      <div class="bg-white p-4 rounded-lg border border-slate-200 flex flex-col">
-        <div class="text-sm text-slate-500"><%= b.repository.full_name %></div>
-        <div class="mt-1 font-medium">Issue #<%= b.github_issue_number %></div>
-        <div class="mt-3 text-2xl font-bold text-emerald-600"><%= b.amount_usdc %> USDC</div>
-        <div class="mt-1 text-xs text-slate-400">expires <%= b.expiry&.to_date %> · merges into <code><%= b.target_branch %></code></div>
-        <%= link_to "View issue →", b.issue_url, target: "_blank", rel: "noopener",
-              class: "mt-3 text-sm text-emerald-600 hover:underline" %>
-      </div>
-    <% end %>
+<div class="wrap screen page">
+  <div style="margin-bottom: 24px; max-width: 560px">
+    <h1 class="h-page">Open bounties</h1>
+    <p class="sub">Funded issues across every repo using GitReward. Solve one, link a wallet, get paid on merge.</p>
   </div>
-<% else %>
-  <div class="mt-10 max-w-lg mx-auto text-center">
-    <div class="text-4xl">◈</div>
-    <h2 class="mt-3 text-lg font-semibold">No open bounties just yet</h2>
-    <p class="mt-2 text-sm text-slate-600">
-      This is where funded GitHub issues will show up — fund one and contributors
-      can find it here. Maintainers: bounty an issue from your dashboard.
-    </p>
-    <div class="mt-5">
-      <% if signed_in? %>
-        <%= link_to "Fund an issue →", dashboard_path,
-              class: "bg-slate-900 text-white px-4 py-2 rounded-md text-sm hover:bg-slate-700" %>
-      <% else %>
-        <%= button_to "Sign in to fund an issue", github_auth_path, method: :post, data: { turbo: false },
-              class: "bg-slate-900 text-white px-4 py-2 rounded-md text-sm hover:bg-slate-700" %>
+
+  <% if @bounties.any? %>
+    <div class="bounty-grid">
+      <% @bounties.each do |b| %>
+        <%= link_to b, class: "card card-pad bounty" do %>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px">
+            <span style="display: inline-flex; align-items: center; gap: 8px; color: var(--tx-2); font-size: 13.5px; min-width: 0">
+              <span style="color: var(--tx-3); flex-shrink: 0; display: inline-flex"><%= icon(:repo, 16) %></span>
+              <span class="truncate"><%= b.repository.full_name %></span>
+            </span>
+            <%= render "bounties/status_badge", bounty: b %>
+          </div>
+          <h3 style="margin: 0 0 18px; font-size: 15.5px; font-weight: 600; line-height: 1.4; letter-spacing: -0.01em">Issue #<%= b.github_issue_number %></h3>
+          <div class="eyebrow" style="margin-bottom: 6px">Reward</div>
+          <span class="amount accent" style="font-size: 24px"><%= b.amount_usdc %><span class="unit">USDC</span></span>
+          <hr class="divider" style="margin: 16px 0 13px">
+          <div style="display: flex; justify-content: space-between; align-items: center">
+            <span style="color: var(--tx-3); font-size: 12.5px">Expires <%= b.expiry&.to_date %> · <%= b.target_branch %></span>
+            <span class="link" style="font-size: 13px">View <%= icon(:arrow, 13) %></span>
+          </div>
+        <% end %>
       <% end %>
     </div>
-  </div>
-<% end %>
+  <% else %>
+    <div class="empty">
+      <div class="empty-icon"><%= gitreward_logo(28) %></div>
+      <h2 class="h-sec" style="font-size: 17px">No open bounties just yet</h2>
+      <p class="sub" style="margin-top: 8px">This is where funded GitHub issues show up — fund one and contributors can find it here. Maintainers: bounty an issue from your dashboard.</p>
+      <div style="margin-top: 20px">
+        <% if signed_in? %>
+          <%= link_to "Fund an issue", dashboard_path, class: "btn btn-primary btn-sm" %>
+        <% else %>
+          <%= button_to github_auth_path, method: :post, data: { turbo: false }, class: "btn btn-primary btn-sm" do %>Sign in to fund an issue<% end %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

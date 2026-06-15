@@ -9,11 +9,25 @@ import {
 // USDC permit domain (name from the token, version per network) and, separately,
 // GitReward's disbursement domain (signed server-side, never here). Don't conflate.
 export default class extends Controller {
-  static targets = ["issue", "branch", "amount", "expiry", "submit", "status", "feeLabel"]
+  static targets = ["issue", "branch", "amount", "expiry", "submit", "status", "feeLabel",
+                    "lockedOut", "feeOut", "netOut"]
   static values = {
     chainId: Number, escrow: String, usdc: String, usdcVersion: String,
     feeBps: Number, createUrl: String, repositoryId: Number, csrf: String,
     rpcUrl: String, chainName: String
+  }
+
+  connect() { this.recalc() }
+
+  // Live escrow summary: split the locked amount into fee + net by the live feeRate.
+  recalc() {
+    const amt = parseFloat(this.amountTarget.value || 0)
+    const feeRate = (this.feeBpsValue || 0) / 10000
+    const fee = amt * feeRate
+    const net = amt - fee
+    if (this.hasLockedOutTarget) this.lockedOutTarget.textContent = amt.toFixed(2) + " USDC"
+    if (this.hasFeeOutTarget) this.feeOutTarget.textContent = "−" + fee.toFixed(2) + " USDC"
+    if (this.hasNetOutTarget) this.netOutTarget.textContent = net.toFixed(2)
   }
 
   // Minimal ABIs (the only functions we touch in-browser).
@@ -168,12 +182,14 @@ export default class extends Controller {
   busy(msg) {
     this.submitTarget.disabled = true
     this.statusTarget.textContent = msg
-    this.statusTarget.className = "text-sm text-slate-600"
+    this.statusTarget.className = "hint"
+    this.statusTarget.style.color = "var(--tx-2)"
   }
 
   fail(msg) {
     this.submitTarget.disabled = false
     this.statusTarget.textContent = msg
-    this.statusTarget.className = "text-sm text-red-600"
+    this.statusTarget.className = "hint"
+    this.statusTarget.style.color = "#f17171"
   }
 }
