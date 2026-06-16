@@ -23,6 +23,12 @@ class ViewsRenderTest < ActionDispatch::IntegrationTest
       amount: 50_000_000, fee_bps_snapshot: 300, expiry: 30.days.from_now,
       chain_bounty_id: 1, fund_tx_hash: "0xabc123"
     )
+    # Funded + expired + owned by current user → exercises the refund-button branch.
+    @expired = @repo.bounties.create!(
+      funder_user: @user, github_issue_number: 8, target_branch: "main", status: "funded",
+      amount: 25_000_000, fee_bps_snapshot: 300, expiry: 2.days.ago,
+      chain_bounty_id: 2, fund_tx_hash: "0xdef456"
+    )
   end
 
   teardown { OmniAuth.config.test_mode = false }
@@ -33,6 +39,7 @@ class ViewsRenderTest < ActionDispatch::IntegrationTest
       "bounties index" => bounties_path,
       "directory" => directory_path,
       "bounty show" => bounty_path(@bounty),
+      "bounty show (expired, refundable)" => bounty_path(@expired),
       "payout wallet" => wallet_path
     }.each do |name, path|
       get path

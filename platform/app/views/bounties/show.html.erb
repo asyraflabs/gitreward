@@ -32,7 +32,16 @@
     <div class="kv"><span class="kv-k">Target branch</span><span class="kv-v"><span class="code-chip"><%= @bounty.target_branch %></span></span></div>
     <div class="kv"><span class="kv-k">Expiry</span><span class="kv-v"><%= @bounty.expiry&.to_date %></span></div>
     <% if @bounty.chain_bounty_id %>
-      <div class="kv"><span class="kv-k">On-chain id</span><span class="kv-v">#<%= @bounty.chain_bounty_id %></span></div>
+      <div class="kv">
+        <span class="kv-k">On-chain id</span>
+        <span class="kv-v">
+          <% if (addr_url = explorer_address_url(Chain::Config.escrow_address)) %>
+            <%= link_to "#{addr_url}#readContract", class: "link", target: "_blank", rel: "noopener" do %>#<%= @bounty.chain_bounty_id %> · verify on <%= explorer_name %> <%= icon(:ext, 12) %><% end %>
+          <% else %>
+            #<%= @bounty.chain_bounty_id %>
+          <% end %>
+        </span>
+      </div>
     <% end %>
     <% if @bounty.recipient_address %>
       <div class="kv"><span class="kv-k">Paid to</span><span class="kv-v" style="font-size: 12.5px"><%= @bounty.recipient_address %></span></div>
@@ -41,20 +50,58 @@
 
     <% if @bounty.fund_tx_hash %>
       <hr class="divider" style="margin: 6px 0 16px">
-      <div class="eyebrow" style="margin-bottom: 8px">Funding transaction</div>
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px">
+        <div class="eyebrow">Funding transaction</div>
+        <% if (tx_url = explorer_tx_url(@bounty.fund_tx_hash)) %>
+          <%= link_to "View on #{explorer_name}", tx_url, class: "link", style: "font-size: 12px", target: "_blank", rel: "noopener" %>
+        <% end %>
+      </div>
       <%= render "ui/copy_chip", value: @bounty.fund_tx_hash %>
     <% end %>
   </div>
 
-  <p class="sub" style="text-align: center; font-size: 13px; margin-top: 16px">
-    <% if @bounty.pending? %>
-      ⏳ Waiting for the fund transaction to confirm — this becomes <strong style="color: var(--tx-2)">funded</strong> once the indexer sees the on-chain event.
-    <% elsif @bounty.funded? %>
-      Open a PR that closes #<%= @bounty.github_issue_number %> and merge it into <span style="color: var(--tx-2); font-weight: 500"><%= @bounty.target_branch %></span> to disburse — or refund yourself after expiry.
-    <% elsif @bounty.disbursed? %>
-      Paid out<%= " for #{@bounty.attestation.pr_ref}" if @bounty.attestation %>. Thanks for using GitReward.
-    <% elsif @bounty.refunded? %>
-      Refunded to the funder after expiry.
+  <% is_funder = signed_in? && current_user == @bounty.funder_user %>
+
+  <% if @bounty.funded? %>
+    <% if is_funder && @bounty.expiry&.past? %>
+      <%# Funder, expired → actionable refund %>
+      <div class="card card-pad" style="margin-top: 16px"
+        data-controller="wallet"
+        data-wallet-chain-id-value="<%= Chain::Config.chain_id %>"
+        data-wallet-chain-name-value="<%= Chain::Config.chain_label %>"
+        data-wallet-rpc-url-value="<%= Chain::Config.public_rpc_url %>"
+        data-wallet-escrow-value="<%= Chain::Config.escrow_address %>"
+        data-wallet-chain-bounty-id-value="<%= @bounty.chain_bounty_id %>"
+        data-wallet-refund-url-value="<%= refund_bounty_path(@bounty) %>"
+        data-wallet-csrf-value="<%= form_authenticity_token %>">
+        <h3 class="h-sec">Refund this bounty</h3>
+        <p class="card-desc">Expired without a merged PR. Refund the full <%= @bounty.amount_usdc %> USDC back to your wallet — no fee. Connect the wallet you funded with.</p>
+        <button type="button" class="btn btn-secondary btn-block" style="margin-top: 16px"
+                data-wallet-target="submit" data-action="wallet#refund">
+          <%= icon(:refund, 16) %> Refund <%= @bounty.amount_usdc %> USDC
+        </button>
+        <p data-wallet-target="status" class="hint" style="margin-top: 10px; min-height: 1em; text-align: center"></p>
+      </div>
+    <% elsif is_funder %>
+      <%# Funder, not yet expired → refund-later info %>
+      <p class="sub" style="text-align: center; font-size: 13px; margin-top: 16px">
+        You can refund this bounty yourself after <strong style="color: var(--tx-2)"><%= @bounty.expiry&.to_date %></strong> if no PR has merged by then.
+      </p>
+    <% else %>
+      <%# Contributor / visitor → how to earn it %>
+      <p class="sub" style="text-align: center; font-size: 13px; margin-top: 16px">
+        Open a PR that closes #<%= @bounty.github_issue_number %> and get it merged into <strong style="color: var(--tx-2)"><%= @bounty.target_branch %></strong> — the bounty pays out to your linked wallet automatically. Link a payout wallet first.
+      </p>
     <% end %>
-  </p>
+  <% else %>
+    <p class="sub" style="text-align: center; font-size: 13px; margin-top: 16px">
+      <% if @bounty.pending? %>
+        ⏳ Waiting for the fund transaction to confirm — this becomes <strong style="color: var(--tx-2)">funded</strong> once the indexer sees the on-chain event.
+      <% elsif @bounty.disbursed? %>
+        Paid out<%= " for #{@bounty.attestation.pr_ref}" if @bounty.attestation %>. Thanks for using GitReward.
+      <% elsif @bounty.refunded? %>
+        Refunded to the funder after expiry.
+      <% end %>
+    </p>
+  <% end %>
 </div>

@@ -10,6 +10,18 @@ class BountiesController < ApplicationController
     @issue_title = issue_title_for(@bounty)
   end
 
+  # Records the refund tx hash after the funder signs refund() in their wallet.
+  # Permissionless on-chain (the contract requires msg.sender == funder); here we
+  # only let the funder record their own bounty. Status flips to `refunded` when
+  # the indexer sees the Refunded event (chain is source of truth).
+  def refund
+    bounty = current_user.bounties.find(params[:id])
+    bounty.update(refund_tx_hash: params[:tx_hash]) if params[:tx_hash].present?
+    render json: { ok: true, redirect: bounty_path(bounty) }
+  rescue ActiveRecord::RecordNotFound
+    render json: { ok: false, errors: ["Bounty not found"] }, status: :not_found
+  end
+
   # Funding form: pick one of the maintainer's open issues, set amount + expiry.
   # The actual fund tx is signed in the browser (viem); see wallet_controller.js.
   def new

@@ -16,7 +16,9 @@ Rails.application.routes.draw do
   resource :wallet, only: %i[show create], controller: :wallets
 
   # --- Maintainer funding flow ---
-  resources :bounties, only: %i[index show new create]
+  resources :bounties, only: %i[index show new create] do
+    member { post :refund } # records the refund tx hash; the funder signs it in their wallet
+  end
 
   # --- Discovery (unlisted in nav until there's traction) ---
   get "/directory" => "directory#index", as: :directory

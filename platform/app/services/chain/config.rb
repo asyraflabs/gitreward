@@ -27,6 +27,7 @@ module Chain
     # Block the indexer begins from on a fresh cursor — the escrow's deploy block.
     # Avoids scanning from genesis (millions of blocks) on a live chain.
     def start_block     = settings.fetch(:start_block, 0).to_i
+    def explorer_url    = settings.fetch(:explorer_url, "").to_s
     def public_rpc_url  = settings.fetch(:public_rpc_url, rpc_url)
     def chain_label     = settings.fetch(:chain_label, "chain #{chain_id}")
 

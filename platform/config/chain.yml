@@ -20,6 +20,7 @@ development:
   chain_label: "<%= ENV.fetch("CHAIN_LABEL", "Anvil (local)") %>"
   confirmations: <%= ENV.fetch("CHAIN_CONFIRMATIONS", 0) %>
   start_block: <%= ENV.fetch("CHAIN_START_BLOCK", 0) %>   # escrow deploy block; 0 = anvil genesis
+  explorer_url: "<%= ENV.fetch("EXPLORER_URL", "") %>"   # block explorer base; blank = none (anvil)
 
 test:
   network: anvil
@@ -44,3 +45,4 @@ production:
   chain_label: "<%= ENV.fetch("CHAIN_LABEL", "Base Sepolia") %>"
   confirmations: <%= ENV.fetch("CHAIN_CONFIRMATIONS", 2) %>
   start_block: <%= ENV.fetch("CHAIN_START_BLOCK", 0) %>   # set to the escrow's deploy block
+  explorer_url: "<%= ENV.fetch("EXPLORER_URL", "https://sepolia.basescan.org") %>"

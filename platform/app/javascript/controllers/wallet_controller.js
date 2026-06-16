@@ -14,13 +14,15 @@ export default class extends Controller {
   static values = {
     chainId: Number, escrow: String, usdc: String, usdcVersion: String,
     feeBps: Number, createUrl: String, repositoryId: Number, csrf: String,
-    rpcUrl: String, chainName: String
+    rpcUrl: String, chainName: String, chainBountyId: Number, refundUrl: String
   }
 
   connect() { this.recalc() }
 
   // Live escrow summary: split the locked amount into fee + net by the live feeRate.
+  // No-op on pages without the amount field (e.g. the refund button on bounty show).
   recalc() {
+    if (!this.hasAmountTarget) return
     const amt = parseFloat(this.amountTarget.value || 0)
     const feeRate = (this.feeBpsValue || 0) / 10000
     const fee = amt * feeRate
@@ -45,6 +47,10 @@ export default class extends Controller {
     { type: "function", name: "name", stateMutability: "view", inputs: [], outputs: [{ type: "string" }] },
     { type: "function", name: "nonces", stateMutability: "view", inputs: [{ name: "owner", type: "address" }], outputs: [{ type: "uint256" }] }
   ]
+  refundAbi = [{
+    type: "function", name: "refund", stateMutability: "nonpayable",
+    inputs: [{ name: "bountyId", type: "uint256" }], outputs: []
+  }]
 
   chain() {
     return defineChain({
@@ -142,6 +148,41 @@ export default class extends Controller {
     } catch (e) {
       console.error(e)
       this.fail(e.shortMessage || e.message || "Funding failed.")
+    }
+  }
+
+  // Refund a funded, expired bounty back to the funder. Permissionless on-chain
+  // (the contract requires msg.sender == funder), no permit, no oracle — the
+  // connected wallet must be the one that funded.
+  async refund(event) {
+    event.preventDefault()
+    if (!window.ethereum) return this.fail("No Ethereum wallet found.")
+    try {
+      this.busy("Connecting wallet…")
+      const chain = this.chain()
+      const wallet = createWalletClient({ chain, transport: custom(window.ethereum) })
+      const [account] = await wallet.requestAddresses()
+      await this.ensureChain(wallet)
+
+      this.busy("Confirm the refund in your wallet…")
+      const txHash = await wallet.writeContract({
+        account, chain,
+        address: this.escrowValue, abi: this.refundAbi, functionName: "refund",
+        args: [BigInt(this.chainBountyIdValue)]
+      })
+
+      this.busy("Refund submitted, confirming…")
+      const res = await fetch(this.refundUrlValue, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRF-Token": this.csrfValue, "Accept": "application/json" },
+        body: JSON.stringify({ tx_hash: txHash })
+      })
+      const data = await res.json()
+      if (data.ok) { this.busy("Refunded! Updating…"); window.location = data.redirect }
+      else this.fail((data.errors || ["Could not record refund"]).join(", "))
+    } catch (e) {
+      console.error(e)
+      this.fail(e.shortMessage || e.message || "Refund failed.")
     }
   }
 
