@@ -1,44 +1,87 @@
 <% content_for :title, "GitReward — bounties that pay themselves" %>
 
-<div class="wrap screen">
-  <section class="hero">
-    <h1>Bounties for GitHub issues<br>that pay themselves.</h1>
-    <p>
-      Maintainers fund their own issues with USDC on Base. When a PR is merged, the
-      bounty disburses automatically to the contributor's linked wallet — no claim,
-      no invoice, no middleman holding the money.
+<%# ambient web3 backdrop: faint grid, fixed behind all content %>
+<div class="lp-bg" aria-hidden="true">
+  <div class="lp-grid"></div>
+</div>
+
+<div class="wrap screen lp">
+  <section class="lp-hero">
+    <h1 class="lp-title">
+      Bounties for GitHub issues<br>
+      that <span class="lp-grad">pay themselves.</span>
+    </h1>
+
+    <p class="lp-lede">
+      Maintainers fund their own issues with USDC on Base, locked in a
+      non-custodial escrow. When a PR is merged, the bounty disburses automatically
+      to the contributor's linked wallet — no claim, no invoice, no middleman
+      holding the money.
     </p>
+
     <div class="hero-cta">
-      <%= button_to github_auth_path, method: :post, data: { turbo: false }, class: "btn btn-primary btn-lg" do %>
+      <%= button_to github_auth_path, method: :post, data: { turbo: false }, class: "btn btn-primary btn-lg btn-glow" do %>
+        <%= github_mark(17) %>
         Sign in with GitHub
       <% end %>
-      <%= link_to "How it works", "#faq", class: "btn btn-ghost btn-lg" %>
+      <%= link_to "#how", class: "btn btn-ghost btn-lg" do %>
+        How it works
+        <%= icon(:arrow, 15) %>
+      <% end %>
+    </div>
+
+    <div class="lp-stats">
+      <div class="lp-stat">
+        <span class="lp-stat-n">10%</span>
+        <span class="lp-stat-l">fee cap, enforced in-contract</span>
+      </div>
+      <div class="lp-stat">
+        <span class="lp-stat-n">0</span>
+        <span class="lp-stat-l">middlemen holding funds</span>
+      </div>
+      <div class="lp-stat">
+        <span class="lp-stat-n">USDC</span>
+        <span class="lp-stat-l">settled on Base, on merge</span>
+      </div>
     </div>
   </section>
 
-  <section class="feature-grid">
-    <div class="card card-pad">
-      <div class="feature-icon"><%= icon(:pin, 22) %></div>
-      <h3 class="h-sec">Post a bounty</h3>
-      <p class="card-desc">Pick one of your open issues and fund it with USDC. The funds lock in an open-source escrow contract on Base — you only pay gas.</p>
+  <section id="how" class="lp-steps-wrap" style="scroll-margin-top: 80px">
+    <div class="lp-sec-head">
+      <span class="eyebrow accent">How it works</span>
+      <h2 class="lp-sec-title">Three steps. The merge does the rest.</h2>
     </div>
-    <div class="card card-pad">
-      <div class="feature-icon"><%= icon(:pull_request, 22) %></div>
-      <h3 class="h-sec">Solve &amp; merge</h3>
-      <p class="card-desc">Contributors open a PR that closes the issue. Merge it into your target branch — the merge is the authorization, nothing else to click.</p>
-    </div>
-    <div class="card card-pad">
-      <div class="feature-icon"><%= icon(:dollar, 22) %></div>
-      <h3 class="h-sec">Get paid</h3>
-      <p class="card-desc">The bounty disburses automatically to the contributor's linked wallet, minus a small fee. Unmatched bounties refund to the funder on a timer.</p>
+
+    <div class="lp-steps">
+      <div class="lp-step">
+        <span class="lp-step-num">01</span>
+        <div class="feature-icon"><%= icon(:pin, 22) %></div>
+        <h3 class="h-sec">Post a bounty</h3>
+        <p class="card-desc">Pick one of your open issues and fund it with USDC. The funds lock in an open-source escrow contract on Base — you only pay gas.</p>
+      </div>
+      <div class="lp-step">
+        <span class="lp-step-num">02</span>
+        <div class="feature-icon"><%= icon(:pull_request, 22) %></div>
+        <h3 class="h-sec">Solve &amp; merge</h3>
+        <p class="card-desc">Contributors open a PR that closes the issue. Merge it into your target branch — the merge is the authorization, nothing else to click.</p>
+      </div>
+      <div class="lp-step">
+        <span class="lp-step-num">03</span>
+        <div class="feature-icon"><%= icon(:dollar, 22) %></div>
+        <h3 class="h-sec">Get paid</h3>
+        <p class="card-desc">The bounty disburses automatically to the contributor's linked wallet, minus a small fee. Unmatched bounties refund to the funder on a timer.</p>
+      </div>
     </div>
   </section>
 
-  <section id="faq" class="faq" style="scroll-margin-top: 24px">
-    <h2 class="h-page" style="font-size: 24px">How your money is handled</h2>
-    <p class="sub">Plain English — non-custodial, one neutral oracle, you only pay gas to fund.</p>
+  <section id="faq" class="faq" style="scroll-margin-top: 80px">
+    <div class="lp-sec-head">
+      <span class="eyebrow accent">Trust &amp; custody</span>
+      <h2 class="lp-sec-title">How your money is handled</h2>
+      <p class="sub">Plain English — non-custodial, one neutral oracle, you only pay gas to fund.</p>
+    </div>
 
-    <div style="margin-top: 24px">
+    <div class="lp-faq-list">
       <div class="faq-item">
         <h3 class="faq-q">Where does the money sit?</h3>
         <p class="faq-a">In an open-source escrow contract on Base — not in our bank account. We can't spend it and we can't stop a refund. You only pay gas to fund it.</p>
@@ -64,5 +107,15 @@
         <p class="faq-a">No — and we won't claim that. It's non-custodial with one neutral oracle. That's an honest, smaller claim than “trustless,” and it's the one we can actually stand behind.</p>
       </div>
     </div>
+  </section>
+
+  <section class="lp-cta">
+    <span class="eyebrow accent">Get started</span>
+    <h2 class="lp-cta-title">Fund your first issue<br>in minutes.</h2>
+    <p class="lp-cta-sub">Sign in with GitHub, pick an open issue, lock USDC. The merge pays it out.</p>
+    <%= button_to github_auth_path, method: :post, data: { turbo: false }, class: "btn btn-primary btn-lg btn-glow" do %>
+      <%= github_mark(17) %>
+      Sign in with GitHub
+    <% end %>
   </section>
 </div>
