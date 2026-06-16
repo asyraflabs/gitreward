@@ -1,0 +1,16 @@
+<%# locals: pagy: (a Pagy instance). Themed prev/next pager; merges ?page= into the current path. %>
+<% if pagy.pages > 1 %>
+  <nav class="pager" aria-label="Pagination">
+    <% if pagy.prev %>
+      <%= link_to "← Prev", url_for(page: pagy.prev), class: "pager-link", rel: "prev" %>
+    <% else %>
+      <span class="pager-link is-disabled">← Prev</span>
+    <% end %>
+    <span class="pager-info">Page <%= pagy.page %> of <%= pagy.pages %></span>
+    <% if pagy.next %>
+      <%= link_to "Next →", url_for(page: pagy.next), class: "pager-link", rel: "next" %>
+    <% else %>
+      <span class="pager-link is-disabled">Next →</span>
+    <% end %>
+  </nav>
+<% end %>

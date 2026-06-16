@@ -38,6 +38,7 @@ class ViewsRenderTest < ActionDispatch::IntegrationTest
       "dashboard" => dashboard_path,
       "bounties index" => bounties_path,
       "directory" => directory_path,
+      "repositories" => repositories_path,
       "bounty show" => bounty_path(@bounty),
       "bounty show (expired, refundable)" => bounty_path(@expired),
       "payout wallet" => wallet_path
@@ -45,6 +46,21 @@ class ViewsRenderTest < ActionDispatch::IntegrationTest
       get path
       assert_response :success, "#{name} (#{path}) failed to render: #{response.status}"
     end
+  end
+
+  test "bounties index paginates (15 per page + pager)" do
+    18.times do |i|
+      @repo.bounties.create!(funder_user: @user, github_issue_number: 100 + i, target_branch: "main",
+                             status: "funded", amount: 5_000_000, fee_bps_snapshot: 300,
+                             expiry: 10.days.from_now, chain_bounty_id: 100 + i)
+    end
+    get bounties_path # 20 total (18 + the 2 from setup)
+    assert_response :success
+    assert_select "table.tbl tbody tr", count: 15 # page size
+    assert_select "nav.pager" # pager shown (>1 page)
+    get bounties_path(page: 2)
+    assert_response :success
+    assert_select "table.tbl tbody tr", count: 5
   end
 
   test "fund view renders" do

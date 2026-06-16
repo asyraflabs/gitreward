@@ -43,6 +43,8 @@ gem "thruster", require: false
 gem "image_processing", "~> 1.2"
 
 # --- GitReward ---
+# Lightweight pagination for the bounties + repositories lists.
+gem "pagy", "~> 9.3"
 # Server-side EVM: EIP-712 attestation signing, contract calls, event reads.
 gem "eth", "~> 0.5"
 # GitHub App + API client (install flow, issues, comments, webhooks).

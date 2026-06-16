@@ -1,7 +1,11 @@
 <% content_for :title, "Your bounties" %>
 
 <div class="wrap screen page">
-  <h1 class="h-page">Your bounties</h1>
+  <%= link_to dashboard_path, class: "link link-muted", style: "margin-bottom: 20px" do %>
+    <span style="transform: rotate(180deg); display: inline-flex"><%= icon(:arrow, 14) %></span> Dashboard
+  <% end %>
+
+  <h1 class="h-page" style="margin-top: 20px">Your bounties</h1>
   <p class="sub" style="margin-bottom: 26px">Issues you're currently funding.</p>
 
   <div class="card card-pad">
@@ -24,4 +28,6 @@
       <p class="card-desc">No bounties yet. <%= link_to "Fund one from your dashboard", dashboard_path, class: "link" %>.</p>
     <% end %>
   </div>
+
+  <%= render "ui/pager", pagy: @pagy %>
 </div>

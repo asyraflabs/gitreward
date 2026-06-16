@@ -20,6 +20,8 @@ Rails.application.routes.draw do
     member { post :refund } # records the refund tx hash; the funder signs it in their wallet
   end
 
+  resources :repositories, only: %i[index]
+
   # --- Discovery (unlisted in nav until there's traction) ---
   get "/directory" => "directory#index", as: :directory
 

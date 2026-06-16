@@ -6,6 +6,7 @@ class User < ApplicationRecord
 
   has_many :wallet_links, dependent: :destroy
   has_many :installations, foreign_key: :installed_by_user_id, dependent: :nullify, inverse_of: :installed_by_user
+  has_many :repositories, through: :installations
   has_many :bounties, foreign_key: :funder_user_id, dependent: :restrict_with_exception, inverse_of: :funder_user
 
   validates :github_user_id, presence: true, uniqueness: true

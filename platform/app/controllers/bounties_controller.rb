@@ -3,7 +3,7 @@ class BountiesController < ApplicationController
   before_action :set_bounty, only: :show
 
   def index
-    @bounties = current_user.bounties.order(created_at: :desc).includes(:repository)
+    @pagy, @bounties = pagy(current_user.bounties.order(created_at: :desc).includes(:repository), limit: 15)
   end
 
   def show

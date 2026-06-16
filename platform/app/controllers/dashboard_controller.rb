@@ -1,10 +1,17 @@
 class DashboardController < ApplicationController
   before_action :require_login
 
+  PREVIEW = 6 # dashboard shows a short preview; full lists live on their own pages
+
   def show
     @wallet = current_user.active_wallet
-    @installations = current_user.installations.includes(:repositories)
-    @bounties = current_user.bounties.order(created_at: :desc).limit(20).includes(:repository)
-    @app_slug = Rails.application.credentials.dig(:github, :app_slug)
+
+    repos = current_user.repositories.order(:full_name)
+    @repos_count = repos.count
+    @repos_preview = repos.limit(PREVIEW)
+
+    bounties = current_user.bounties.order(created_at: :desc).includes(:repository)
+    @bounties_count = bounties.count
+    @bounties_preview = bounties.limit(PREVIEW)
   end
 end

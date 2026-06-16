@@ -1,5 +1,4 @@
 <% content_for :title, "Dashboard" %>
-<% repos = @installations.flat_map(&:repositories) %>
 
 <div class="wrap screen page">
   <h1 class="h-page">Dashboard</h1>
@@ -23,15 +22,15 @@
       <% end %>
     </div>
 
-    <%# Repositories %>
+    <%# Repositories (preview; full list paginated at /repositories) %>
     <div class="card card-pad">
       <div class="card-head">
         <h2 class="h-sec h-sec-nowrap">Repositories</h2>
         <p class="card-desc">Repos connected to GitReward.</p>
       </div>
-      <% if repos.any? %>
+      <% if @repos_preview.any? %>
         <div style="margin-top: -2px">
-          <% repos.each do |repo| %>
+          <% @repos_preview.each do |repo| %>
             <div class="repo-row">
               <div style="display: flex; align-items: center; gap: 12px; min-width: 0">
                 <span class="icon-box"><%= icon(:repo, 17) %></span>
@@ -41,6 +40,9 @@
             </div>
           <% end %>
         </div>
+        <% if @repos_count > @repos_preview.size %>
+          <%= link_to repositories_path, class: "view-all" do %>View all <%= @repos_count %> repositories <%= icon(:arrow, 13) %><% end %>
+        <% end %>
       <% else %>
         <p class="card-desc" style="margin-bottom: 14px">Install the GitReward GitHub App on a repo you own to fund its issues.</p>
         <%= link_to "Install GitHub App", install_path, class: "btn btn-secondary btn-sm" %>
@@ -48,25 +50,25 @@
     </div>
   </div>
 
-  <%# Your bounties %>
+  <%# Your bounties (preview; full list paginated at /bounties) %>
   <div class="card card-pad">
     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; gap: 16px">
       <div>
         <h2 class="h-sec h-sec-nowrap">Your bounties</h2>
         <p class="card-desc">Issues you're currently funding.</p>
       </div>
-      <% if repos.any? %>
-        <%= link_to new_bounty_path(repository_id: repos.first.id), class: "btn btn-primary btn-sm", style: "flex-shrink: 0" do %>
+      <% if @repos_preview.any? %>
+        <%= link_to new_bounty_path(repository_id: @repos_preview.first.id), class: "btn btn-primary btn-sm", style: "flex-shrink: 0" do %>
           <%= icon(:dollar, 15) %> New bounty
         <% end %>
       <% end %>
     </div>
 
-    <% if @bounties.any? %>
+    <% if @bounties_preview.any? %>
       <table class="tbl">
         <thead><tr><th>Issue</th><th>Amount</th><th>Status</th><th>Expiry</th><th></th></tr></thead>
         <tbody>
-          <% @bounties.each do |b| %>
+          <% @bounties_preview.each do |b| %>
             <tr>
               <td><span style="font-size: 13.5px"><%= b.repository.full_name %><span class="accent" style="margin-left: 1px"> #<%= b.github_issue_number %></span></span></td>
               <td><% if b.amount_usdc %><span style="font-weight: 500"><%= b.amount_usdc %> <span style="color: var(--tx-3)">USDC</span></span><% else %><span style="color: var(--tx-3)">—</span><% end %></td>
@@ -77,6 +79,9 @@
           <% end %>
         </tbody>
       </table>
+      <% if @bounties_count > @bounties_preview.size %>
+        <%= link_to bounties_path, class: "view-all" do %>View all <%= @bounties_count %> bounties <%= icon(:arrow, 13) %><% end %>
+      <% end %>
     <% else %>
       <p class="card-desc">No bounties yet. Fund an issue from one of your repos above to get started.</p>
     <% end %>

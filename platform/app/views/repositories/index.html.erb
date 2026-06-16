@@ -1,0 +1,28 @@
+<% content_for :title, "Repositories" %>
+
+<div class="wrap screen page-narrow">
+  <%= link_to dashboard_path, class: "link link-muted", style: "margin-bottom: 20px" do %>
+    <span style="transform: rotate(180deg); display: inline-flex"><%= icon(:arrow, 14) %></span> Dashboard
+  <% end %>
+
+  <h1 class="h-page" style="margin-top: 20px">Repositories</h1>
+  <p class="sub" style="margin-bottom: 24px">Repos connected to GitReward. Fund an open issue in any of them.</p>
+
+  <div class="card card-pad">
+    <% if @repositories.any? %>
+      <% @repositories.each do |repo| %>
+        <div class="repo-row">
+          <div style="display: flex; align-items: center; gap: 12px; min-width: 0">
+            <span class="icon-box"><%= icon(:repo, 17) %></span>
+            <span style="font-size: 13.5px" class="truncate"><%= repo.full_name %></span>
+          </div>
+          <%= link_to new_bounty_path(repository_id: repo.id), class: "link", style: "font-size: 13.5px" do %>Fund <%= icon(:arrow, 13) %><% end %>
+        </div>
+      <% end %>
+    <% else %>
+      <p class="card-desc">No repositories connected. <%= link_to "Install the GitHub App", install_path, class: "link" %> on a repo you own.</p>
+    <% end %>
+  </div>
+
+  <%= render "ui/pager", pagy: @pagy %>
+</div>
