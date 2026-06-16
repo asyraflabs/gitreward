@@ -3,7 +3,7 @@ module IconsHelper
   # (reference/components.jsx object `I`). Usage: <%= icon(:repo, 16) %>.
   ICON_DEFAULT_SIZE = {
     repo: 17, arrow: 16, ext: 14, copy: 15, check: 15, wallet: 17,
-    dollar: 20, pin: 20, branch: 20, pull_request: 20, lock: 16
+    dollar: 20, circle_dollar: 20, pin: 20, branch: 20, pull_request: 20, lock: 16, refund: 16
   }.freeze
 
   ICON_PATHS = {
@@ -13,11 +13,13 @@ module IconsHelper
     copy: %(<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/>),
     check: %(<path d="m5 12 4.5 4.5L19 7"/>),
     wallet: %(<rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 9h13a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H3"/><circle cx="16.5" cy="12.5" r="1" fill="currentColor" stroke="none"/>),
-    dollar: %(<path d="M12 3v18M16 7.5c0-1.4-1.8-2.5-4-2.5s-4 1.1-4 2.5 1.8 2.3 4 2.5 4 1.1 4 2.5-1.8 2.5-4 2.5-4-1.1-4-2.5"/>),
-    pin: %(<path d="M9 4h6M12 4v6M8 10h8l-1.5 4h-5L8 10ZM12 14v6"/>),
+    dollar: %(<line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>),
+    pin: %(<path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/>),
     branch: %(<circle cx="6" cy="5" r="2.4"/><circle cx="6" cy="19" r="2.4"/><circle cx="18" cy="7" r="2.4"/><path d="M6 7.4v9.2M18 9.4c0 4-3 5-6 5"/>),
-    pull_request: %(<circle cx="6" cy="6" r="2.4"/><circle cx="6" cy="18" r="2.4"/><circle cx="18" cy="18" r="2.4"/><path d="M6 8.4v7.2M18 15.6V12a3 3 0 0 0-3-3h-3l2.5-2.5M12 9l2.5 2.5"/>),
-    lock: %(<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>)
+    pull_request: %(<circle cx="5" cy="6" r="3"/><path d="M5 9v12"/><circle cx="19" cy="18" r="3"/><path d="m15 9-3-3 3-3"/><path d="M12 6h5a2 2 0 0 1 2 2v7"/>),
+    circle_dollar: %(<circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/>),
+    lock: %(<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>),
+    refund: %(<path d="M4 9h11a5 5 0 0 1 0 10h-4"/><path d="M8 5 4 9l4 4"/>)
   }.freeze
 
   def icon(name, size = nil)

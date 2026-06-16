@@ -290,18 +290,26 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .btn-glow { box-shadow: 0 0 0 1px rgba(249,115,22,0.35), 0 10px 34px -8px rgba(249,115,22,0.6); }
 .btn-glow:hover { box-shadow: 0 0 0 1px rgba(249,115,22,0.55), 0 12px 44px -6px rgba(249,115,22,0.8); }
 
-/* --- trust stat strip --- */
-.lp-stats {
-  display: flex; justify-content: center; flex-wrap: wrap; gap: 0;
-  margin: 52px auto 0; max-width: 660px;
+/* open-source signal under the hero CTAs */
+.lp-os {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 22px;
+  font-size: 13px; color: var(--tx-3); transition: color .15s;
 }
-.lp-stat {
-  display: flex; flex-direction: column; gap: 4px; align-items: center;
-  padding: 0 30px; flex: 1; min-width: 160px;
+.lp-os:hover { color: var(--tx); }
+.lp-os svg:last-child { transition: transform .15s; }
+.lp-os:hover svg:last-child { transform: translateX(2px); }
+
+/* --- trust bar --- */
+.lp-trust {
+  display: flex; justify-content: center; align-items: center; flex-wrap: wrap;
+  gap: 0; margin: 48px auto 0; max-width: 720px;
 }
-.lp-stat + .lp-stat { border-left: 1px solid var(--stroke); }
-.lp-stat-n { font-size: 30px; font-weight: 700; letter-spacing: -0.03em; color: var(--tx); line-height: 1; }
-.lp-stat-l { font-size: 12.5px; color: var(--tx-3); line-height: 1.45; text-align: center; }
+.lp-trust-item {
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 0 24px; font-size: 14px; font-weight: 500; color: var(--tx-2);
+}
+.lp-trust-item + .lp-trust-item { border-left: 1px solid var(--stroke); }
+.lp-trust-item svg { color: var(--orange); flex-shrink: 0; }
 
 /* --- section heads --- */
 .lp-sec-head { text-align: center; max-width: 620px; margin: 0 auto 36px; }
@@ -341,6 +349,36 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 .lp-step .card-desc { margin-top: 7px; }
 
+/* --- pricing --- */
+.lp-pricing { margin-top: 112px; }
+.lp-price-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+  max-width: 820px; margin: 0 auto; align-items: stretch;
+}
+.lp-price {
+  position: relative; overflow: hidden; display: flex; flex-direction: column;
+  padding: 28px; border-radius: var(--r); border: 1px solid var(--stroke); background: var(--card);
+}
+.lp-price-feature {
+  border-color: var(--orange-line);
+  box-shadow: 0 22px 60px -32px rgba(249,115,22,0.55);
+}
+.lp-price-feature::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--orange), transparent);
+}
+.lp-price-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.lp-price-name { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.lp-price-amt { display: flex; align-items: baseline; gap: 9px; margin-top: 16px; }
+.lp-price-num { font-size: 46px; font-weight: 700; letter-spacing: -0.035em; line-height: 1; }
+.lp-price-feature .lp-price-num { color: var(--orange); }
+.lp-price-per { font-size: 13.5px; color: var(--tx-3); }
+.lp-price .card-desc { margin-top: 12px; }
+.lp-price-list { list-style: none; margin: 20px 0 24px; padding: 0; display: flex; flex-direction: column; gap: 11px; flex: 1; }
+.lp-price-list li { display: flex; align-items: flex-start; gap: 9px; font-size: 13.5px; color: var(--tx-2); line-height: 1.45; }
+.lp-price-list li svg { color: var(--orange); flex-shrink: 0; margin-top: 1px; }
+.lp-price .btn { margin-top: auto; }
+
 /* --- faq --- */
 .faq { max-width: 760px; margin: 112px auto 0; }
 .lp-faq-list {
@@ -375,8 +413,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .wrap { padding: 0 16px; }
   .page, .page-narrow, .page-wide { padding-left: 16px; padding-right: 16px; }
   .h-page { font-size: 24px; }
-  .grid-2, .grid-3, .feature-grid, .fund-grid, .lp-steps { grid-template-columns: 1fr; }
+  .grid-2, .grid-3, .feature-grid, .fund-grid, .lp-steps, .lp-price-grid { grid-template-columns: 1fr; }
 
+  .lp-pricing { margin-top: 80px; }
   .lp-hero { padding-top: 52px; }
   .lp-title { font-size: 38px; }
   .lp-lede { font-size: 16px; }
@@ -385,8 +424,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .lp-steps-wrap, .faq { margin-top: 80px; }
   .lp-cta { padding: 72px 22px 88px; }
 
-  /* stat strip stacks: drop the vertical dividers, add row separators */
-  .lp-stats { gap: 0; }
-  .lp-stat { padding: 16px 0; min-width: 100%; }
-  .lp-stat + .lp-stat { border-left: none; border-top: 1px solid var(--stroke); }
+  /* trust bar stacks vertically, dividers removed */
+  .lp-trust { flex-direction: column; gap: 14px; margin-top: 36px; }
+  .lp-trust-item { padding: 0; }
+  .lp-trust-item + .lp-trust-item { border-left: none; }
 }
