@@ -28,7 +28,7 @@ See [`LICENSING.md`](./LICENSING.md) for the open-core split.
 | 1 | Protocol design (frozen spec — Appendix A) | ✅ Frozen; cross-language EIP-712 gate proven |
 | 2 | Smart contract + tests | ✅ Built (37 tests: unit/fuzz/adversarial); deployed & exercised on Base Sepolia |
 | 3 | Rails platform (web + oracle + relayer) | ✅ Full flow validated end-to-end on Base Sepolia (real testnet USDC) |
-| 5 | Open-source & business setup | 🟡 Licensing done; CLA + self-hoster guide pending |
+| 5 | Open-source & business setup | 🟡 Licensing, CLA, CONTRIBUTING, self-hoster guide done; CLA bot + positioning copy pending |
 | 7 | Key management (§7) | 🟡 v1 baseline (keys in encrypted credentials, oracle/relayer split); hardening deferred to v2 (Appendix B.3) |
 | 4 | Hardening: audit · testnet beta · mainnet | ⬜ Not started (gates mainnet) |
 

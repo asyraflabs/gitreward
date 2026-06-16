@@ -23,7 +23,8 @@ AGPL keeps the label, protects the hosted business, and is well understood.
 
 The contracts are MIT, so you may deploy your own GitRewardEscrow. Self-hosters
 set their own `treasury` and `oracle` addresses and call `setFeeRate(0)` to run
-fee-free. See the deploy guide (forthcoming) for the full instance setup.
+fee-free. See [`docs/self-hosting.md`](./docs/self-hosting.md) for the full
+deploy-your-own-instance guide.
 
 A self-hoster is their own oracle — and thus must trust themselves. The neutral
 hosted oracle is a feature contributors may prefer.
@@ -31,5 +32,5 @@ hosted oracle is a feature contributors may prefer.
 ## Contributing
 
 A CLA is required before the first external contribution is merged, so the
-hosted version can be dual-licensed if needed. See `CONTRIBUTING.md`
-(forthcoming).
+hosted version can be dual-licensed if needed. See [`CLA.md`](./CLA.md) and
+[`CONTRIBUTING.md`](./CONTRIBUTING.md).
