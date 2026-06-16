@@ -20,12 +20,11 @@
 
     <div class="hero-cta">
       <%= button_to github_auth_path, method: :post, data: { turbo: false }, class: "btn btn-primary btn-lg btn-glow" do %>
-        <%= github_mark(17) %>
-        Sign in with GitHub
+        Get started
+        <%= icon(:arrow, 15) %>
       <% end %>
       <%= link_to "#how", class: "btn btn-ghost btn-lg" do %>
         How it works
-        <%= icon(:arrow, 15) %>
       <% end %>
     </div>
 
