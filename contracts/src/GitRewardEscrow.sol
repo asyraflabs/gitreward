@@ -104,6 +104,7 @@ contract GitRewardEscrow is EIP712, Ownable, ReentrancyGuard {
     error AmountBelowMinimum(uint256 amount, uint256 minimum);
     error ExpiryTooSoon(uint64 expiry, uint64 earliest);
     error BountyNotFunded(uint256 bountyId, Status status);
+    error BountyExpired(uint64 expiry, uint256 nowTs);
     error NotExpiredYet(uint64 expiry, uint256 nowTs);
     error NotFunder(address caller, address funder);
     error InvalidRecipient();
@@ -185,8 +186,14 @@ contract GitRewardEscrow is EIP712, Ownable, ReentrancyGuard {
     /// @notice Disburse a funded bounty to a contributor wallet. Submitted by the
     ///         platform relayer, but authorized by the oracle's EIP-712 signature
     ///         over (bountyId, recipient) — msg.sender is irrelevant to safety.
-    /// @dev    No expiry check: a valid signature can disburse any time while the
-    ///         bounty is Funded (the oracle simply won't sign when inappropriate).
+    /// @dev    Only callable strictly before expiry. At/after expiry a bounty can
+    ///         only be refunded (refund requires block.timestamp >= expiry), so the
+    ///         two paths partition cleanly at the boundary with no overlap. This
+    ///         bounds the window in which a compromised oracle key could redirect a
+    ///         given bounty to [fund, expiry): past-expiry bounties are
+    ///         theft-proof (funder-refundable only). Trade-off: a PR merged in the
+    ///         final moments before expiry whose disburse tx mines after expiry
+    ///         reverts; the oracle should not sign that close to the deadline.
     /// @param bountyId        The bounty to release.
     /// @param recipient       The contributor wallet, bound into the signature.
     /// @param oracleSignature EIP-712 signature from the oracle signer.
@@ -195,6 +202,7 @@ contract GitRewardEscrow is EIP712, Ownable, ReentrancyGuard {
 
         Bounty storage b = _bounties[bountyId];
         if (b.status != Status.Funded) revert BountyNotFunded(bountyId, b.status);
+        if (block.timestamp >= b.expiry) revert BountyExpired(b.expiry, block.timestamp);
 
         // Verify the attestation. ECDSA.recover rejects malleable (high-s) and
         // zero signatures, so a forged/replayed signature cannot recover the

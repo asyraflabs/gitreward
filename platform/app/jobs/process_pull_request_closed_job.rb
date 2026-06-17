@@ -36,6 +36,14 @@ class ProcessPullRequestClosedJob < ApplicationJob
       return
     end
 
+    # The contract refuses to disburse at/after expiry (past-expiry bounties are
+    # refund-only). Don't submit a doomed, gas-wasting tx — let it ride to refund.
+    if bounty.expiry && !bounty.expiry.future?
+      Rails.logger.info("Bounty #{bounty.id}: merged but past expiry (#{bounty.expiry}); refund-only, standing down")
+      comment(resolver, bounty, expired_body(bounty))
+      return
+    end
+
     # --- Recipient resolution (A.1 #4): authoritative live wallet lookup ---
     author = User.find_by(github_user_id: resolver.author_github_id)
     wallet = author&.active_wallet
@@ -80,5 +88,11 @@ class ProcessPullRequestClosedJob < ApplicationJob
     "⚠️ **GitReward:** this PR merged and closed a bountied issue, but the author has " \
       "**no linked wallet**, so the **#{bounty.amount_usdc} USDC** bounty could not be paid. " \
       "It will refund to the maintainer after expiry (#{bounty.expiry&.to_date})."
+  end
+
+  def expired_body(bounty)
+    "⚠️ **GitReward:** this PR merged, but the **#{bounty.amount_usdc} USDC** bounty " \
+      "**expired on #{bounty.expiry&.to_date}** and can no longer be disbursed — past-expiry " \
+      "bounties are refund-only. The maintainer can refund it; re-fund the issue to pay this work."
   end
 end

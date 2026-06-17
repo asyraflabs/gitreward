@@ -297,6 +297,30 @@ contract GitRewardEscrowTest is Test {
         escrow.disburse(bountyId, recipient, sig);
     }
 
+    function test_disburse_revertsAtOrAfterExpiry() public {
+        uint256 bountyId = _fund(100_000_000, 7 days);
+        uint64 expiry = escrow.getBounty(bountyId).expiry;
+        bytes memory sig = _oracleSig(oraclePk, bountyId, recipient);
+
+        // Even a valid oracle signature cannot disburse once expiry is reached —
+        // past-expiry bounties are refund-only (bounds the key-theft window).
+        vm.warp(expiry);
+        vm.prank(relayer);
+        vm.expectRevert(abi.encodeWithSelector(GitRewardEscrow.BountyExpired.selector, expiry, block.timestamp));
+        escrow.disburse(bountyId, recipient, sig);
+    }
+
+    function test_disburse_succeedsJustBeforeExpiry() public {
+        uint256 bountyId = _fund(100_000_000, 7 days);
+        uint64 expiry = escrow.getBounty(bountyId).expiry;
+        bytes memory sig = _oracleSig(oraclePk, bountyId, recipient);
+
+        vm.warp(uint256(expiry) - 1); // one second before expiry still disburses
+        vm.prank(relayer);
+        escrow.disburse(bountyId, recipient, sig);
+        assertEq(uint8(escrow.getBounty(bountyId).status), uint8(GitRewardEscrow.Status.Disbursed));
+    }
+
     function test_disburse_revertsOnZeroRecipient() public {
         uint256 bountyId = _fund(100_000_000, 30 days);
         bytes memory sig = _oracleSig(oraclePk, bountyId, address(0));
