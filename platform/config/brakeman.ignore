@@ -1,0 +1,14 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "Cross-Site Scripting",
+      "fingerprint": "be27d534be32667470f305e22487b766bca86bb70abdb5773448ad4d9ae86fb8",
+      "check_name": "LinkToHref",
+      "message": "Potentially unsafe model attribute in `link_to` href",
+      "file": "app/views/bounties/show.html.erb",
+      "line": 20,
+      "note": "False positive: Bounty#issue_url is a server-constructed URL, 'https://github.com/#{repository.full_name}/issues/#{github_issue_number}'. full_name is GitHub-sourced (owner/repo, format-constrained) and github_issue_number is an integer column, so the href is always a well-formed https://github.com URL and can never be a javascript: scheme. Triaged in AUDIT.md (Part 2)."
+    }
+  ],
+  "brakeman_version": "8.0.5"
+}

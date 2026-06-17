@@ -16,7 +16,8 @@ fund. Not "trustless."
 | [`contracts/`](./contracts)| Solidity escrow (Foundry). The trust anchor.      | MIT       |
 | [`platform/`](./platform)  | Rails platform: web + oracle + relayer.           | AGPL-3.0  |
 | [`oracle/`](./oracle)      | Canonical EIP-712 signer, shared by app + contract test. | AGPL-3.0 |
-| [`docs/`](./docs)          | Merge-correctness webhook spec.                   | —         |
+| [`docs/`](./docs)          | Merge-correctness spec, self-hosting guide.       | —         |
+| [`AUDIT.md`](./AUDIT.md)   | Security audit readiness — contract **and** platform. | —     |
 | [`gitreward-build-plan.md`](./gitreward-build-plan.md) | Full build plan. **Appendix A is the frozen spec.** | — |
 
 See [`LICENSING.md`](./LICENSING.md) for the open-core split.

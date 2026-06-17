@@ -1,0 +1,21 @@
+title = "GitReward gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Exclude vendored dependencies and well-known public test keys"
+paths = [
+  # Vendored OpenZeppelin contracts (and their test fixtures) — not our code.
+  '''contracts/lib/.*''',
+  # Encrypted Rails credentials — ciphertext, not plaintext secrets. master.key
+  # (the decryption key) is gitignored and has never been committed.
+  '''platform/config/credentials\.yml\.enc''',
+]
+# Well-known anvil/hardhat default private keys used only for LOCAL dev/tests.
+# These are public (documented in Foundry/Hardhat) and never used for real funds.
+regexes = [
+  '''ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80''', # anvil #0
+  '''59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d''', # anvil #1
+  '''7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6''', # anvil #3
+]
