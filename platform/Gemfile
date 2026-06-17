@@ -45,6 +45,8 @@ gem "image_processing", "~> 1.2"
 # --- GitReward ---
 # Lightweight pagination for the bounties + repositories lists.
 gem "pagy", "~> 9.3"
+# Throttle/block abusive requests (webhook floods, scraping, auth/mutation abuse).
+gem "rack-attack", "~> 6.7"
 # Server-side EVM: EIP-712 attestation signing, contract calls, event reads.
 gem "eth", "~> 0.5"
 # GitHub App + API client (install flow, issues, comments, webhooks).

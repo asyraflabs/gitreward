@@ -203,6 +203,18 @@ corrected by the indexer — **no money moves on client input.** The disburse
 recipient is the PR author's linked wallet resolved server-side and bound into the
 oracle signature; no client input selects it.
 
+### Availability / abuse — rate limiting
+**Rack::Attack** (`config/initializers/rack_attack.rb`) throttles by IP, with
+counters in `Rails.cache` (solid_cache in prod, shared across Puma workers):
+a 300/5min general backstop (assets + `/up` exempt), 120/min on the public
+`POST /webhooks/github` flood surface (generous so GitHub delivery bursts aren't
+clipped — forgeries are already rejected by HMAC), 15/min on `POST /auth/github`,
+and 30/min on authenticated mutations (fund/refund/wallet) to bound row/tx spam.
+Throttled requests get a `429` + `Retry-After`. Localhost is safelisted (health
+checks). Covered by `test/integration/rack_attack_test.rb`. This is app-layer
+hygiene, **not** volumetric DoS protection — that belongs at the edge (a CDN /
+the proxy); a small VPS is still trivially floodable at the network layer.
+
 ### Other classes (checked, clean)
 - **Mass assignment:** strong params (`bounty_params`, `wallet_params`).
 - **SQL injection:** ActiveRecord throughout; the indexer uses raw JSON-RPC, not SQL.
