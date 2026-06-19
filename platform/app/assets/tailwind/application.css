@@ -263,8 +263,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   -webkit-mask-image: radial-gradient(120% 75% at 50% 0%, #000 0%, transparent 70%);
   mask-image: radial-gradient(120% 75% at 50% 0%, #000 0%, transparent 70%);
 }
-/* keep landing content above the backdrop */
-.lp { position: relative; z-index: 1; }
+/* keep landing content above the backdrop; clip the hero glow's horizontal
+   bleed so it can't widen the page on mobile (clip, not hidden, so the glow's
+   vertical bleed stays visible and the sticky nav is unaffected) */
+.lp { position: relative; z-index: 1; overflow-x: clip; }
 
 /* --- hero --- */
 .lp-hero { position: relative; text-align: center; max-width: 720px; margin: 0 auto; padding: 96px 0 24px; }
