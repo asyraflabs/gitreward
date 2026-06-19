@@ -61,9 +61,9 @@ The repo uses a CLA bot to gate PRs. Two common options:
 - **Tests pass.** `forge test` for contract changes; `bin/rails test` for platform
   changes. Add tests for new behavior.
 - **Match the surrounding style.** No new dependencies without discussion.
-- **Don't touch the frozen spec.** Appendix A of `gitreward-build-plan.md` is the
-  load-bearing EIP-712 / contract-interface contract. Changes there ripple across
-  Solidity and Ruby simultaneously — raise an issue first.
+- **Don't touch the frozen spec.** [`docs/contract-spec.md`](docs/contract-spec.md)
+  is the load-bearing EIP-712 / contract-interface contract. Changes there ripple
+  across Solidity and Ruby simultaneously — raise an issue first.
 - **Keep the trust pitch intact.** The contract must never custody or misdirect
   principal; never describe the system as "trustless."
 

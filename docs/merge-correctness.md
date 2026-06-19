@@ -1,11 +1,11 @@
-# Merge-correctness & recipient resolution (Phase 1 exit criterion)
+# Merge-correctness & recipient resolution
 
-Concrete webhook-handling pseudocode for the oracle, implementing the frozen
-spec: merge-correctness rule (A.1 #3) and recipient resolution (A.1 #4). This is
-the precise definition of "what counts as merged into the correct branch" that
-the build plan (§3.4) requires before writing the listener.
+Concrete webhook-handling pseudocode for the oracle, implementing the
+merge-correctness rule and recipient resolution from
+[`contract-spec.md`](contract-spec.md). This is the precise definition of "what
+counts as merged into the correct branch" the oracle relies on.
 
-This document is the contract the Phase 3 Rails oracle implements. The chain
+This document is the contract the Rails oracle implements. The chain
 already enforces the money rules; this defines when the oracle is willing to
 **sign**.
 
@@ -21,11 +21,11 @@ already enforces the money rules; this defines when the oracle is willing to
   by regex on the body — GitHub itself resolves the linkage.
 - **Target branch**: the branch chosen by the maintainer at fund time and stored
   on the bounty (`bounties.target_branch`). Default: the repo default branch.
-- **Payee unit**: the GitHub PR **author** (co-authors out of scope for v1).
+- **Payee unit**: the GitHub PR **author**.
 
 ---
 
-## A.1 #3 — Merge-correctness rule
+## Merge-correctness rule
 
 A merge authorizes disbursement **iff ALL of the following hold**:
 
@@ -38,11 +38,11 @@ A merge authorizes disbursement **iff ALL of the following hold**:
 
 This covers all three GitHub merge methods (merge commit, squash, rebase)
 uniformly, because we trust `merged == true` + the closing linkage rather than
-inspecting commit topology. **Post-merge reverts are out of scope for v1.**
+inspecting commit topology.
 
 ---
 
-## A.1 #4 — Recipient resolution
+## Recipient resolution
 
 - **PR opened** → informational nudge only (never authorizes anything).
 - **Merge time** → authoritative live lookup of the author's active wallet.
@@ -103,7 +103,7 @@ on pull_request.closed(payload):
         record_pr_event(action="closed_unmerged", delivery_id, processed=now)
         return 200                                          # abandoned, never pays
 
-    # Enqueue — NEVER do chain work in the webhook request (build plan §2).
+    # Enqueue — NEVER do chain work in the webhook request.
     enqueue(DisburseJob, payload_subset, delivery_id)
     return 200
 ```
@@ -121,12 +121,12 @@ def DisburseJob(payload, delivery_id):
 
         record_pr_event(bounty, payload, action="closed_merged", delivery_id)
 
-        # --- Merge-correctness (A.1 #3) ---
+        # --- Merge-correctness ---
         if bounty is None:                       return       # no funded bounty closed
         if bounty.status != Funded:              return       # already disbursed/refunded
         if payload.pull_request.base.ref != bounty.target_branch: return  # wrong branch
 
-        # --- Recipient resolution (A.1 #4), authoritative live lookup ---
+        # --- Recipient resolution, authoritative live lookup ---
         wallet = active_wallet_for(payload.pull_request.user.id)
         if wallet is None:
             comment(issue, "Merged, but the author has no linked wallet. The "
@@ -146,13 +146,13 @@ def DisburseJob(payload, delivery_id):
         attestation.update(submitted_tx_hash=tx.hash)
 
         # Status flips to `disbursed` when the indexer sees the Disbursed event
-        # (chain is source of truth, C.1). Update the issue comment to "paid"
+        # (chain is source of truth). Update the issue comment to "paid"
         # on confirmation.
 ```
 
 ---
 
-## Edge cases & how this rule handles them (build plan §3.4)
+## Edge cases & how this rule handles them
 
 | Case | Handling |
 |---|---|
@@ -162,6 +162,6 @@ def DisburseJob(payload, delivery_id):
 | Author has no wallet at merge | Oracle does nothing; bounty refunds at expiry. No on-chain "unpaid" state. |
 | Webhook redelivery | `github_delivery_id` unique + `idempotency_lock` + `Attestation` unique on `bounty_id` → at-most-once disbursement. |
 | Two PRs close the same issue | First merged PR satisfying the rule disburses; the bounty flips to `Disbursed`, so later merges find `status != Funded` and no-op. |
-| Force-push / post-merge revert | Out of scope for v1 (A.1 #3). Disbursement is irreversible on-chain. |
+| Force-push / post-merge revert | Disbursement is irreversible on-chain. |
 | Wallet changed between open and merge | Merge-time lookup wins (the opened comment was informational). |
 ```

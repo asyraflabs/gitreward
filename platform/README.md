@@ -1,6 +1,6 @@
 # GitReward platform (Rails)
 
-The web app + oracle + relayer, in one Rails 8 codebase (build plan §5). AGPL-3.0
+The web app + oracle + relayer, in one Rails 8 codebase. AGPL-3.0
 (repo root `LICENSE`). Server-rendered Hotwire; the only browser chain code is a
 single viem Stimulus island (`app/javascript/controllers/wallet_controller.js`).
 
@@ -8,7 +8,7 @@ single viem Stimulus island (`app/javascript/controllers/wallet_controller.js`).
 
 | Area | Where |
 |------|-------|
-| Data model (Appendix C) | `app/models/*`, `db/migrate/*` |
+| Data model | `app/models/*`, `db/migrate/*` |
 | GitHub OAuth login | `config/initializers/omniauth.rb`, `app/controllers/sessions_controller.rb` |
 | GitHub App (install, webhooks, issues) | `app/services/github/*`, `app/controllers/webhooks_controller.rb` |
 | Chain seam (eth.rb) | `app/services/chain/*` (config, client, signer, indexer) |
@@ -18,7 +18,7 @@ single viem Stimulus island (`app/javascript/controllers/wallet_controller.js`).
 
 The EIP-712 signer is the repo-root `oracle/attestation.rb`, loaded via
 `config/initializers/oracle_attestation.rb` so the Ruby signer and the Solidity
-verifier never diverge (the Phase 1 gate).
+verifier never diverge (proven by a cross-language round-trip test).
 
 ## Setup
 
@@ -32,7 +32,7 @@ Secrets live in Rails encrypted credentials (`bin/rails credentials:edit`):
 ```yaml
 active_record_encryption: { primary_key: …, deterministic_key: …, key_derivation_salt: … }
 chain:
-  oracle_key:  <hex, no 0x>   # signs attestations — the crown jewel (§7)
+  oracle_key:  <hex, no 0x>   # signs attestations — the crown jewel
   relayer_key: <hex, no 0x>   # pays gas only; MUST be a different key
 github:
   oauth_client_id: …          # GitHub OAuth app (login)
@@ -67,8 +67,8 @@ bin/jobs                    # worker: processes jobs + recurring indexer (every 
 ```
 
 Both processes need the chain env (see below). The chain is the source of truth;
-the DB is a rebuildable mirror (C.1). Swapping Solid Queue for Sidekiq in
-production is a one-line adapter change (build plan §2).
+the DB is a rebuildable mirror. Swapping Solid Queue for Sidekiq in
+production is a one-line adapter change.
 
 ## Local end-to-end on anvil (no testnet, no real funds)
 
@@ -102,7 +102,7 @@ set -a && . ./.env.base_sepolia && set +a && bin/jobs
 > Indexer note: the recurring job resumes from `chain_sync_state.last_synced_block`.
 > On a fresh cursor it begins at `CHAIN_START_BLOCK` (the escrow's deploy block),
 > not genesis — set it per network (anvil defaults to 0). The DB money state is
-> fully rebuildable by wiping the cursor and replaying from there (C.1).
+> fully rebuildable by wiping the cursor and replaying from there.
 
 ## Tests
 
