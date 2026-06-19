@@ -443,4 +443,51 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .lp-trust { flex-direction: column; gap: 14px; margin-top: 36px; }
   .lp-trust-item { padding: 0; }
   .lp-trust-item + .lp-trust-item { border-left: none; }
+
+  .beta-banner { font-size: 12.5px; padding: 9px 16px; }
+  .beta-note { display: none; }
+}
+
+/* ============================================================
+   Testnet beta banner (shown only on beta.gitreward.com)
+   ============================================================ */
+.beta-banner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 20px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--tx-2);
+  background: var(--amber-soft);
+  border-bottom: 1px solid var(--amber-line);
+}
+.beta-banner strong { color: var(--tx); font-weight: 600; }
+.beta-tag {
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--amber);
+  padding: 2px 8px;
+  border: 1px solid var(--amber-line);
+  border-radius: var(--r-pill);
+}
+.beta-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 0 0 var(--amber-line);
+  animation: beta-pulse 2s ease-out infinite;
+}
+.beta-note { color: var(--tx-3); }
+@keyframes beta-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(217, 164, 65, 0.5); }
+  70%  { box-shadow: 0 0 0 7px rgba(217, 164, 65, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(217, 164, 65, 0); }
 }

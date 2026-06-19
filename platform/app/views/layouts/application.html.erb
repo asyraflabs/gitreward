@@ -22,6 +22,20 @@
   </head>
 
   <body class="shell">
+    <% if beta_host? %>
+      <div class="beta-banner" role="status">
+        <span class="beta-dot" aria-hidden="true"></span>
+        <span class="beta-tag">Beta</span>
+        <span class="beta-msg">
+          <% if current_page?(root_path) %>
+            The <strong><%= Chain::Config.chain_label %> testnet</strong> is live — try it with test USDC.
+          <% else %>
+            You're on the <strong><%= Chain::Config.chain_label %> testnet</strong>.
+          <% end %>
+        </span>
+      </div>
+    <% end %>
+
     <nav class="nav">
       <div class="wrap nav-inner">
         <%= link_to root_path, class: "brand" do %>
