@@ -80,6 +80,12 @@ asset_path: /rails/public/assets
 builder:
   arch: amd64
 
+  # Build from the repo root so the image can include the canonical
+  # oracle/attestation.rb (single source of truth shared with contracts/).
+  # The Dockerfile stays in platform/; only the context expands.
+  context: ..
+  dockerfile: platform/Dockerfile
+
   # # Build image via remote server (useful for faster amd64 builds on arm64 computers)
   # remote: ssh://docker@docker-builder-server
   #

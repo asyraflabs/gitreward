@@ -1,0 +1,44 @@
+# Build context is the repo root (see config/deploy.yml builder.context) so
+# the Rails app can ship the canonical oracle/attestation.rb alongside it.
+# Docker only reads .dockerignore from the context root, so the rules that
+# used to live in platform/.dockerignore are mirrored here with a platform/
+# prefix, and the non-deployed sibling dirs are excluded entirely.
+
+# --- Repo-root siblings not part of the image ---
+/.git/
+/.gitignore
+/contracts/
+/docs/
+/*.md
+/LICENSE
+
+# --- oracle/: ship only the canonical attestation module's deps ---
+# (oracle/ is COPYed explicitly in the Dockerfile; nothing to exclude here)
+
+# --- platform/ (formerly platform/.dockerignore, re-anchored) ---
+/platform/.git/
+/platform/.gitignore
+/platform/.bundle
+/platform/.env*
+/platform/config/master.key
+/platform/config/credentials/*.key
+/platform/log/*
+/platform/tmp/*
+!/platform/log/.keep
+!/platform/tmp/.keep
+/platform/tmp/pids/*
+!/platform/tmp/pids/.keep
+/platform/storage/*
+!/platform/storage/.keep
+/platform/tmp/storage/*
+!/platform/tmp/storage/.keep
+/platform/node_modules/
+/platform/app/assets/builds/*
+!/platform/app/assets/builds/.keep
+/platform/public/assets
+/platform/.github
+/platform/config/deploy*.yml
+/platform/.kamal
+/platform/.devcontainer
+/platform/.dockerignore
+/platform/Dockerfile*
