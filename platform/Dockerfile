@@ -30,9 +30,14 @@ ENV RAILS_ENV="production" \
 # Throw-away build stage to reduce size of final image
 FROM base AS build
 
-# Install packages needed to build gems
+# Install packages needed to build gems.
+# Beyond the Rails defaults: libssl-dev for the openssl gem, and
+# autoconf/automake/libtool/libgmp-dev for rbsecp256k1 (it compiles a vendored
+# libsecp256k1 via autotools). Both are pulled in by the `eth` gem.
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git libvips libyaml-dev pkg-config && \
+    apt-get install --no-install-recommends -y \
+      build-essential git libvips libyaml-dev pkg-config \
+      libssl-dev autoconf automake libtool libgmp-dev && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Install application gems
